@@ -4,41 +4,33 @@ namespace _TheGame._Scripts.Helpers
 {
     public static class Enums
     {
-        public enum NutColorType
+        [Serializable]
+        public enum BlockColorType
         {
             None,
             Blue,
-            Purple,
-            Grey,
-            Yellow,
+            DarkBlue,
             Green,
             Orange,
-            DarkGreen,
-            DarkBlue,
+            Pink,
+            Purple,
             Red,
-            Pink
-        }
-        
-        [Serializable]
-        public enum Sound
-        {
-            Kazanma,
-            VidaBitirme,
-            VidaCikma,
-            VidaGirme,
-            VidaOturma,
-            VidaUzama,
-            ButtonClick,
-            Menu,
-            Hop
+            Yellow,
         }
 
         [Serializable]
-        public enum ButtonType
+        public enum BlockShapeType
         {
             None,
-            Classic,
-            Rewarded
+            TopLeft,
+            TopRight,
+            BottomLeft,
+            BottomRight,
+            TopDouble,
+            BottomDouble,
+            LeftDouble,
+            RightDouble,
+            FullSquare
         }
     }
 }

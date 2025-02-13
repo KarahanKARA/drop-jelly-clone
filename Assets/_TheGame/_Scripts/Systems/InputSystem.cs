@@ -4,7 +4,7 @@ namespace _TheGame._Scripts.Systems
 {
     public class InputSystem : MonoBehaviour
     {
-        [SerializeField] private BlockSystem activeBlock;
+        [SerializeField] private BlockMovement activeBlock;
         
         private Camera _mainCamera;
         

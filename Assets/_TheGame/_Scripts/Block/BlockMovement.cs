@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace _TheGame._Scripts.Systems
 {
-    public class BlockSystem : MonoBehaviour
+    public class BlockMovement : MonoBehaviour
     {
         public AnimationCurve animationCurve;
         

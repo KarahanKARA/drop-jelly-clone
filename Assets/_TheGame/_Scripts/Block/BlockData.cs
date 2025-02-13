@@ -1,18 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class BlockData : MonoBehaviour
+namespace _TheGame._Scripts.Block
 {
-    // Start is called before the first frame update
-    void Start()
+    public static class BlockData
     {
-        
-    }
+        public static Vector2 TopLeftPos = new Vector2(-0.5f, 0.5f);
+        public static Vector2 TopRightPos = new Vector2(0.5f, 0.5f);
+        public static Vector2 BottomLeftPos = new Vector2(-0.5f, -0.5f);
+        public static Vector2 BottomRightPos = new Vector2(0.5f, -0.5f);
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        public static Vector2 TopDoublePos = new Vector2(0, 0.5f);
+        public static Vector2 BottomDoublePos = new Vector2(0, -0.5f);
+        public static Vector2 LeftDoublePos = new Vector2(-0.5f, 0);
+        public static Vector2 RightDoublePos = new Vector2(0.5f, 0);
     }
 }

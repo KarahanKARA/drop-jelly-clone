@@ -2316,20 +2316,20 @@ MonoBehaviour:
     blockColorMaterial: {fileID: 2100000, guid: 9bdaf6e4e3cfd4b929a3a14297dc8c42, type: 2}
   blockShapeScaleAndLocalPosList:
   - blockShapeType: 1
-    localPos: {x: -0.5, y: 0.5}
-    localScale: {x: 1, y: 1}
-  - blockShapeType: 2
-    localPos: {x: 0.5, y: 0.5}
-    localScale: {x: 1, y: 1}
-  - blockShapeType: 3
-    localPos: {x: -0.5, y: -0.5}
-    localScale: {x: 1, y: 1}
-  - blockShapeType: 4
-    localPos: {x: 0.5, y: -0.5}
-    localScale: {x: 1, y: 1}
-  - blockShapeType: 5
     localPos: {x: 0, y: 0.5}
     localScale: {x: 2, y: 1}
+  - blockShapeType: 2
+    localPos: {x: -0.5, y: -0.5}
+    localScale: {x: 1, y: 1}
+  - blockShapeType: 3
+    localPos: {x: 0.5, y: -0.5}
+    localScale: {x: 1, y: 1}
+  - blockShapeType: 4
+    localPos: {x: 0.5, y: 0.5}
+    localScale: {x: 1, y: 1}
+  - blockShapeType: 5
+    localPos: {x: -0.5, y: 0.5}
+    localScale: {x: 1, y: 1}
   - blockShapeType: 6
     localPos: {x: 0, y: -0.5}
     localScale: {x: 2, y: 1}

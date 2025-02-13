@@ -7,7 +7,7 @@ namespace _TheGame._Scripts.Block
     {
         [SerializeField] private float maxRotationAngle = 30f;
         [SerializeField] private float rotationDuration = 3.3f;
-        [SerializeField] private float resetDelay = 0.1f; // Hareket durunca ne kadar süre sonra reset başlasın
+        [SerializeField] private float resetDelay = 0.1f;
         public AnimationCurve animationCurve;
     
         private float _lastXPosition;
@@ -36,7 +36,7 @@ namespace _TheGame._Scripts.Block
 
             if (Mathf.Abs(direction) > 0.01f)
             {
-                _lastMovementTime = Time.time; // Hareket zamanını güncelle
+                _lastMovementTime = Time.time; 
             
                 float targetRotation = direction < 0 ? maxRotationAngle : -maxRotationAngle;
             

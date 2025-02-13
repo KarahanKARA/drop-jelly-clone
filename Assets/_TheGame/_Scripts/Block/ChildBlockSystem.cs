@@ -22,14 +22,23 @@ namespace _TheGame._Scripts.Block
         public void SetBlockColor(Enums.BlockColorType blockColorType)
         {
             currentBlockColorType = blockColorType;
-            _meshRenderer.materials[0] = DataManager.Instance.GetMaterialByColor(blockColorType);
+            var baseMaterial = DataManager.Instance.GetMaterialByColor(blockColorType);
+            var materialInstance = new Material(baseMaterial);
+            currentBlockColorType = blockColorType;
+            _meshRenderer.materials = new[] { materialInstance };
         }
 
         public void SetBlockShape(Enums.BlockShapeType blockShapeType)
         {
+            currentBlockShapeType = blockShapeType;
             var (scale, position) =DataManager.Instance.GetShapeData(blockShapeType);
-            transform.DOScale(scale, animationDuration);
-            transform.DOLocalMove(position, animationDuration);
+            Vector3 scaleVector = scale;
+            Vector3 posVector = position;
+            scaleVector.z = 1;
+            posVector.z = -1;
+            
+            transform.DOScale(scaleVector, animationDuration);
+            transform.DOLocalMove(posVector, animationDuration);
         }
     }
 }

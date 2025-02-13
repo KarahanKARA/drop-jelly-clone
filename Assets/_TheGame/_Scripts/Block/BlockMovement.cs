@@ -16,6 +16,7 @@ namespace _TheGame._Scripts.Block
         public bool IsMoving { get; private set; }  
     
         [SerializeField] private float moveSpeed = 10f;
+        [SerializeField] private float xDuration = 0.2f;
     
         private Vector3 _initialPosition;
         private bool _isDragging;
@@ -77,11 +78,12 @@ namespace _TheGame._Scripts.Block
                 return;
             }
 
-            transform.DOMoveX(targetPosition.x, .5f).OnComplete(() =>
+            transform.DOMoveX(targetPosition.x, xDuration).OnComplete(() =>
             {
                 var distance = Mathf.Abs(transform.position.y - targetPosition.y);
-                transform.DOMoveY(targetPosition.y, distance)
-                    .SetSpeedBased()
+                var duration = distance / moveSpeed;
+        
+                transform.DOMoveY(targetPosition.y, duration)
                     .SetEase(animationCurve)
                     .OnComplete(() =>
                     {

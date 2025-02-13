@@ -25,12 +25,12 @@ namespace _TheGame._Scripts.Systems
         private void Update()
         {
             if (_blockCreatorSystem.CurrentActiveBlock == null) return;
-            if (_blockCreatorSystem.CurrentActiveBlock.IsMoving) return;  // Block düşerken input alma
+            if (_blockCreatorSystem.CurrentActiveBlock.IsMoving) return; 
         
             _dragPlane = new Plane(Vector3.forward, 
                 new Vector3(0, 0, _blockCreatorSystem.CurrentActiveBlock.transform.position.z));
 
-            if (Input.GetMouseButtonDown(0) && !_isDragging)  // Sadece dragging değilken yeni input al
+            if (Input.GetMouseButtonDown(0) && !_isDragging) 
             {
                 HandleDragStart();
             }

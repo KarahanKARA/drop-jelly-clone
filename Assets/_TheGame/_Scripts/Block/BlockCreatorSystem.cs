@@ -14,9 +14,10 @@ namespace _TheGame._Scripts.Block
             CreateNewBlock();
         }
 
-        public void CreateNewBlock()
+        private void CreateNewBlock()
         {
             var newBlock = Instantiate(PrefabReferences.Instance.blockPrefab, GameData.BlockSpawnPos, Quaternion.identity);
+            newBlock.transform.parent = ComponentReferences.Instance.createdBlockParent;
             var blockSystem = newBlock.GetComponent<BlockSystem>();
             blockSystem.CreateChildBlocks();
             _currentActiveBlock = newBlock.GetComponent<BlockMovement>();

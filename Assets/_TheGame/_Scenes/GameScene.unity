@@ -450,6 +450,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardGrid: {fileID: 1889571127}
+  createdBlockParent: {fileID: 836299579}
 --- !u!1 &435614593
 GameObject:
   m_ObjectHideFlags: 0
@@ -919,6 +920,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockPrefab: {fileID: 466212889023763029, guid: 47aae02890cd349ca9c08559d2270e34, type: 3}
   block1X1Prefab: {fileID: 4915511712926800424, guid: 558006d6e213a48b28a07a4d00a7810e, type: 3}
+--- !u!1 &836299578
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 836299579}
+  m_Layer: 0
+  m_Name: CreatedBlockParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &836299579
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 836299578}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &847250332
 GameObject:
   m_ObjectHideFlags: 0
@@ -2138,6 +2170,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rgbColorSystem: {fileID: 1342621787}
   blockCreatorSystem: {fileID: 1342621789}
+  matchSystem: {fileID: 0}
 --- !u!1 &2010548805
 GameObject:
   m_ObjectHideFlags: 0
@@ -2317,31 +2350,31 @@ MonoBehaviour:
   blockShapeScaleAndLocalPosList:
   - blockShapeType: 1
     localPos: {x: 0, y: 0.5}
-    localScale: {x: 2, y: 1}
+    localScale: {x: 1.9, y: 0.95}
   - blockShapeType: 2
     localPos: {x: -0.5, y: -0.5}
-    localScale: {x: 1, y: 1}
+    localScale: {x: 0.95, y: 0.95}
   - blockShapeType: 3
     localPos: {x: 0.5, y: -0.5}
-    localScale: {x: 1, y: 1}
+    localScale: {x: 0.95, y: 0.95}
   - blockShapeType: 4
     localPos: {x: 0.5, y: 0.5}
-    localScale: {x: 1, y: 1}
+    localScale: {x: 0.95, y: 0.95}
   - blockShapeType: 5
     localPos: {x: -0.5, y: 0.5}
-    localScale: {x: 1, y: 1}
+    localScale: {x: 0.95, y: 0.95}
   - blockShapeType: 6
     localPos: {x: 0, y: -0.5}
-    localScale: {x: 2, y: 1}
+    localScale: {x: 1.9, y: 0.95}
   - blockShapeType: 7
     localPos: {x: -0.5, y: 0}
-    localScale: {x: 1, y: 2}
+    localScale: {x: 0.95, y: 1.9}
   - blockShapeType: 8
     localPos: {x: 0.5, y: 0}
-    localScale: {x: 1, y: 2}
+    localScale: {x: 0.95, y: 1.9}
   - blockShapeType: 9
     localPos: {x: 0, y: 0}
-    localScale: {x: 2, y: 2}
+    localScale: {x: 1.9, y: 1.9}
 --- !u!1 &2147383356
 GameObject:
   m_ObjectHideFlags: 0
@@ -2427,3 +2460,4 @@ SceneRoots:
   - {fileID: 1075910925}
   - {fileID: 1889571126}
   - {fileID: 150640289}
+  - {fileID: 836299579}

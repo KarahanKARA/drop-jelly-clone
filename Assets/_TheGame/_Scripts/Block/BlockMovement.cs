@@ -82,7 +82,7 @@ namespace _TheGame._Scripts.Block
             {
                 var distance = Mathf.Abs(transform.position.y - targetPosition.y);
                 var duration = distance / moveSpeed;
-        
+
                 transform.DOMoveY(targetPosition.y, duration)
                     .SetEase(animationCurve)
                     .OnComplete(() =>

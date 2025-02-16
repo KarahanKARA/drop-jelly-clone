@@ -1,7 +1,7 @@
 using DG.Tweening;
 using UnityEngine;
 
-namespace _TheGame._Scripts.Systems
+namespace _TheGame._Scripts.Systems.Visuals
 {
     public class RgbColorSystem : MonoBehaviour
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using _TheGame._Scripts.Helpers;
 using UnityEngine;
 
-namespace _TheGame._Scripts
+namespace _TheGame._Scripts.Managers
 {
     [Serializable]
     public class BlockColor

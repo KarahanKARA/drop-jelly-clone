@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4161840180355703634}
   - component: {fileID: -2337661581529044551}
   m_Layer: 0
-  m_Name: Child_Block_1x1_prefab
+  m_Name: ChildBlockPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

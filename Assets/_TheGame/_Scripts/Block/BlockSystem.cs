@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using _TheGame._Scripts.Board;
@@ -17,10 +18,8 @@ namespace _TheGame._Scripts.Block
 
         public List<BlockDataModel.ChildBlockData> childBlockDataList = new List<BlockDataModel.ChildBlockData>();
 
-        private readonly Dictionary<Enums.ConnectionType, ChildBlockSystem> _childBlockMap
+        public Dictionary<Enums.ConnectionType, ChildBlockSystem> _childBlockMap 
             = new Dictionary<Enums.ConnectionType, ChildBlockSystem>();
-
-        private static HashSet<BlockSystem> blockSystemsToExpand = new HashSet<BlockSystem>();
 
         [Header("FORMAT : COLUMN, ROW")] public Vector2Int positionData = new Vector2Int();
 
@@ -32,15 +31,43 @@ namespace _TheGame._Scripts.Block
             positionData = new Vector2Int(-10, -10);
         }
 
+        public void CreateChildBlock(Enums.ConnectionType positionType, Enums.BlockColorType colorType,
+            Enums.ConnectionType connectedWith)
+        {
+            var childObj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
+            var childBlockSystem = childObj.GetComponent<ChildBlockSystem>();
 
-        private void TryMakeBigSquareIfSingleColor()
+            var blockPosType = GetBlockPositionType(positionType);
+            var shapeData = DataManager.Instance.blockShapeScaleAndLocalPosList.Find(
+                x => x.blockPositionType == blockPosType);
+
+            if (shapeData != null)
+            {
+                var initialPos = new Vector3(shapeData.localPos.x, shapeData.localPos.y, 0f);
+                var initialScale = new Vector3(shapeData.localScale.x, shapeData.localScale.y, 1f);
+
+                childBlockSystem.Initialize(positionType, initialPos, initialScale);
+                childBlockSystem.SetBlockColor(colorType);
+
+                if (connectedWith != Enums.ConnectionType.None)
+                {
+                    childBlockSystem.SetConnection(connectedWith);
+                }
+
+                _childBlockMap[positionType] = childBlockSystem;
+            }
+        }
+        
+        #region BigSquare
+
+        public void TryMakeBigSquareIfSingleColor()
         {
             if (_childBlockMap.Count >= 4) return;
-
             if (_childBlockMap.Count == 0) return;
 
             var remainingBlocks = _childBlockMap.Values.ToList();
             var firstColor = remainingBlocks[0].blockColor;
+
             foreach (var cb in remainingBlocks)
             {
                 if (cb.blockColor != firstColor)
@@ -72,41 +99,43 @@ namespace _TheGame._Scripts.Block
             }
         }
 
-        private void CreateChildBlockForBigSquare(Enums.ConnectionType positionType, Enums.BlockColorType color)
+        private void CreateChildBlockForBigSquare(Enums.ConnectionType pos, Enums.BlockColorType color)
         {
-            var childObj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
-            var childBlockSystem = childObj.GetComponent<ChildBlockSystem>();
-
-            var blockPosType = GetBlockPositionType(positionType);
-            var shapeData = DataManager.Instance.blockShapeScaleAndLocalPosList.Find(
-                x => x.blockPositionType == blockPosType);
-
+            var obj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
+            var c = obj.GetComponent<ChildBlockSystem>();
+            var blockPosType = GetBlockPositionType(pos);
+            var shapeData = DataManager.Instance.blockShapeScaleAndLocalPosList.Find(x => x.blockPositionType == blockPosType);
             if (shapeData != null)
             {
-                var initialPos = new Vector3(shapeData.localPos.x, shapeData.localPos.y, 0f);
-                var initialScale = new Vector3(shapeData.localScale.x, shapeData.localScale.y, 1f);
+                var initPos = new Vector3(shapeData.localPos.x, shapeData.localPos.y, 0f);
+                var initScale = new Vector3(shapeData.localScale.x, shapeData.localScale.y, 1f);
+                c.Initialize(pos, initPos, initScale);
+                c.SetBlockColor(color);
 
-                childBlockSystem.Initialize(positionType, initialPos, initialScale);
-                childBlockSystem.SetBlockColor(color);
+                var data = DataManager.Instance.GetConnectionData(pos);
+                if (data != null)
+                {
+                    c.transform.localPosition += new Vector3(data.positionOffset.x, data.positionOffset.y, 0f);
+                    c.transform.localScale = new Vector3(data.scaleAdjustment.x, data.scaleAdjustment.y, 0.975f);
+                }
 
-                childBlockSystem.isBigSquare = true;
-
-                _childBlockMap[positionType] = childBlockSystem;
+                c.isBigSquare = true;
+                _childBlockMap[pos] = c;
             }
         }
 
 
-        public void CheckSameColorAsNeighbors()
+        #endregion
+
+        #region Matching Logic (FindBlocksToDestroy + DestroyMatchingBlocksAnimated)
+
+        public HashSet<ChildBlockSystem> FindBlocksToDestroy()
         {
-            if (_boardGrid == null) return;
-
             var blocksToDestroy = new HashSet<ChildBlockSystem>();
-
             foreach (var kvp in _childBlockMap)
             {
                 var childBlock = kvp.Value;
                 var neighbors = GetExactNeighborBlocks(childBlock);
-
                 foreach (var neighbor in neighbors)
                 {
                     if (neighbor != null && neighbor.blockColor == childBlock.blockColor)
@@ -118,28 +147,67 @@ namespace _TheGame._Scripts.Block
                     }
                 }
             }
+            return blocksToDestroy;
+        }
 
-            if (blocksToDestroy.Count > 0)
+        private void FindConnectedBlocksToDestroy(ChildBlockSystem block, HashSet<ChildBlockSystem> blocksToDestroy)
+        {
+            if (block == null || !block.IsConnected) return;
+            var connected = GetConnectedBlock(block);
+            if (connected != null && connected.blockColor == block.blockColor)
             {
-                DestroyMatchingBlocks(blocksToDestroy);
+                blocksToDestroy.Add(connected);
+            }
+        }
+
+        private ChildBlockSystem GetConnectedBlock(ChildBlockSystem block)
+        {
+            if (block == null || !block.IsConnected) return null;
+            if (_childBlockMap.TryGetValue(block.ConnectedWith, out var connectedBlock))
+            {
+                return connectedBlock;
+            }
+
+            return null;
+        }
+
+        public IEnumerator DestroyMatchingBlocksAnimated(HashSet<ChildBlockSystem> blocksToDestroy)
+        {
+            var seq = DOTween.Sequence();
+            foreach (var b in blocksToDestroy)
+            {
+                if (b == null) continue;
+                seq.Join(b.transform.DOScale(Vector3.zero, 0.3f));
+            }
+            var done = false;
+            seq.OnComplete(() => done = true);
+            while (!done) yield return null;
+
+            foreach (var b in blocksToDestroy)
+            {
+                if (b == null) continue;
+                var parent = b.transform.parent.GetComponent<BlockSystem>();
+                if (parent != null) parent._childBlockMap.Remove(b.position);
+                Destroy(b.gameObject);
             }
         }
 
 
+        #endregion
+
+        #region Neighbors
+
         private List<ChildBlockSystem> GetExactNeighborBlocks(ChildBlockSystem childBlock)
         {
             var neighbors = new List<ChildBlockSystem>();
-
             var x = positionData.x;
             var y = positionData.y;
-
 
             switch (childBlock.position)
             {
                 case Enums.ConnectionType.TopLeft:
                     if (x - 1 >= 0)
                         neighbors.Add(GetChildBlockAt(x - 1, y, Enums.ConnectionType.TopRight));
-
                     if (y - 1 >= 0)
                         neighbors.Add(GetChildBlockAt(x, y - 1, Enums.ConnectionType.BottomLeft));
                     break;
@@ -147,7 +215,6 @@ namespace _TheGame._Scripts.Block
                 case Enums.ConnectionType.TopRight:
                     if (x + 1 < BoardSize)
                         neighbors.Add(GetChildBlockAt(x + 1, y, Enums.ConnectionType.TopLeft));
-
                     if (y - 1 >= 0)
                         neighbors.Add(GetChildBlockAt(x, y - 1, Enums.ConnectionType.BottomRight));
                     break;
@@ -155,7 +222,6 @@ namespace _TheGame._Scripts.Block
                 case Enums.ConnectionType.BottomLeft:
                     if (x - 1 >= 0)
                         neighbors.Add(GetChildBlockAt(x - 1, y, Enums.ConnectionType.BottomRight));
-
                     if (y + 1 < BoardSize)
                         neighbors.Add(GetChildBlockAt(x, y + 1, Enums.ConnectionType.TopLeft));
                     break;
@@ -163,114 +229,53 @@ namespace _TheGame._Scripts.Block
                 case Enums.ConnectionType.BottomRight:
                     if (x + 1 < BoardSize)
                         neighbors.Add(GetChildBlockAt(x + 1, y, Enums.ConnectionType.BottomLeft));
-
                     if (y + 1 < BoardSize)
                         neighbors.Add(GetChildBlockAt(x, y + 1, Enums.ConnectionType.TopRight));
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
 
             return neighbors;
         }
 
-
         private ChildBlockSystem GetChildBlockAt(int x, int y, Enums.ConnectionType childPosition)
         {
+            if (_boardGrid == null) return null;
+
             var neighborBlockSystem = _boardGrid.GetBlockSystemAt(x, y);
             if (neighborBlockSystem == null) return null;
 
-            return neighborBlockSystem._childBlockMap.GetValueOrDefault(childPosition);
+            if (neighborBlockSystem._childBlockMap.TryGetValue(childPosition, out var childBlock))
+            {
+                return childBlock;
+            }
+
+            return null;
         }
 
-        private void FindConnectedBlocksToDestroy(ChildBlockSystem block, HashSet<ChildBlockSystem> blocksToDestroy)
-        {
-            if (block.IsConnected)
-            {
-                var connectedBlock = GetConnectedBlock(block);
-                if (connectedBlock != null)
-                {
-                    blocksToDestroy.Add(connectedBlock);
-                }
-            }
-        }
+        #endregion
 
-
-        private void DestroyMatchingBlocks(HashSet<ChildBlockSystem> blocksToDestroy)
-        {
-            foreach (var block in blocksToDestroy)
-            {
-                var parentSystem = block.transform.parent.GetComponent<BlockSystem>();
-                if (parentSystem != null)
-                {
-                    blockSystemsToExpand.Add(parentSystem);
-                }
-            }
-
-            foreach (var block in blocksToDestroy)
-            {
-                var parentSystem = block.transform.parent.GetComponent<BlockSystem>();
-                if (parentSystem != null)
-                {
-                    parentSystem._childBlockMap.Remove(block.position);
-                }
-
-                Destroy(block.gameObject);
-            }
-
-            foreach (var blockSystem in blockSystemsToExpand)
-            {
-                blockSystem.CheckExpand();
-                blockSystem.TryMakeBigSquareIfSingleColor(); 
-                blockSystem.CheckIfEmpty(); 
-            }
-
-            blockSystemsToExpand.Clear();
-        }
-
-        public void CheckIfEmpty()
-        {
-            if (_childBlockMap.Count == 0)
-            {
-                Debug.Log($"BlockSystem {positionData} is empty => remove from grid & apply gravity");
-                var col = positionData.x;
-                var row = positionData.y;
-
-                // Kendi kaydını sil
-                if (_boardGrid != null)
-                {
-                    _boardGrid.UnregisterBlockSystem(col, row);
-                    // GridPosition'u boş olarak işaretlemek istersen:
-                    _boardGrid.SetPositionEmpty(row, col);
-                }
-
-                // Kendini yok et (GameObject)
-                Destroy(this.gameObject);
-
-                // Şimdi gravity
-                if (_boardGrid != null)
-                {
-                    _boardGrid.ApplyGravity(col);
-                }
-            }
-        }
-        
+        #region Expand + CheckEmpty
 
         public void CheckExpand()
         {
             var emptyPositions = new List<Enums.ConnectionType>();
-            foreach (Enums.ConnectionType pos in Enum.GetValues(typeof(Enums.ConnectionType)))
+            var allPos = new[]
             {
-                if (pos != Enums.ConnectionType.None && !_childBlockMap.ContainsKey(pos))
+                Enums.ConnectionType.TopLeft,
+                Enums.ConnectionType.TopRight,
+                Enums.ConnectionType.BottomLeft,
+                Enums.ConnectionType.BottomRight
+            };
+
+            foreach (var pos in allPos)
+            {
+                if (!_childBlockMap.ContainsKey(pos))
                 {
                     emptyPositions.Add(pos);
                 }
             }
 
-            if (emptyPositions.Count == 0)
-            {
-                return;
-            }
+            if (emptyPositions.Count == 0) return;
 
             foreach (var emptyPos in emptyPositions)
             {
@@ -287,69 +292,6 @@ namespace _TheGame._Scripts.Block
                 {
                     Debug.Log($"No expansion possible for {emptyPos}");
                 }
-            }
-        }
-
-
-        private bool TryExpandHorizontally(Enums.ConnectionType emptyPos)
-        {
-            var remainingBlocks = _childBlockMap.Values.ToList();
-
-            var sourceBlock = remainingBlocks.FirstOrDefault(block =>
-            {
-                if (block.IsConnected) return false;
-
-                return (block.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.TopRight) ||
-                       (block.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.TopLeft) ||
-                       (block.position == Enums.ConnectionType.BottomLeft &&
-                        emptyPos == Enums.ConnectionType.BottomRight) ||
-                       (block.position == Enums.ConnectionType.BottomRight &&
-                        emptyPos == Enums.ConnectionType.BottomLeft);
-            });
-
-            if (sourceBlock != null)
-            {
-                CloneAndMove(sourceBlock, emptyPos);
-                return true;
-            }
-
-            return false;
-        }
-
-        private ChildBlockSystem GetConnectedBlock(ChildBlockSystem block)
-        {
-            if (block == null || !block.IsConnected) return null;
-
-            var parentBlockSystem = block.transform.parent.GetComponent<BlockSystem>();
-            if (parentBlockSystem == null) return null;
-
-            return parentBlockSystem._childBlockMap.GetValueOrDefault(block.ConnectedWith);
-        }
-
-        public void CreateChildBlock(Enums.ConnectionType positionType, Enums.BlockColorType colorType,
-            Enums.ConnectionType connectedWith)
-        {
-            var childObj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
-            var childBlockSystem = childObj.GetComponent<ChildBlockSystem>();
-
-            var blockPosType = GetBlockPositionType(positionType);
-            var shapeData = DataManager.Instance.blockShapeScaleAndLocalPosList.Find(
-                x => x.blockPositionType == blockPosType);
-
-            if (shapeData != null)
-            {
-                var initialPos = new Vector3(shapeData.localPos.x, shapeData.localPos.y, 0f);
-                var initialScale = new Vector3(shapeData.localScale.x, shapeData.localScale.y, 1f);
-
-                childBlockSystem.Initialize(positionType, initialPos, initialScale);
-                childBlockSystem.SetBlockColor(colorType);
-
-                if (connectedWith != Enums.ConnectionType.None)
-                {
-                    childBlockSystem.SetConnection(connectedWith);
-                }
-
-                _childBlockMap[positionType] = childBlockSystem;
             }
         }
 
@@ -380,10 +322,35 @@ namespace _TheGame._Scripts.Block
             return false;
         }
 
+        private bool TryExpandHorizontally(Enums.ConnectionType emptyPos)
+        {
+            var remainingBlocks = _childBlockMap.Values.ToList();
+
+            var sourceBlock = remainingBlocks.FirstOrDefault(block =>
+            {
+                if (block.IsConnected) return false;
+
+                return (block.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.TopRight) ||
+                       (block.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.TopLeft) ||
+                       (block.position == Enums.ConnectionType.BottomLeft &&
+                        emptyPos == Enums.ConnectionType.BottomRight) ||
+                       (block.position == Enums.ConnectionType.BottomRight &&
+                        emptyPos == Enums.ConnectionType.BottomLeft);
+            });
+
+            if (sourceBlock != null)
+            {
+                CloneAndMove(sourceBlock, emptyPos);
+                return true;
+            }
+
+            return false;
+        }
+
         private void CloneAndMove(ChildBlockSystem sourceBlock, Enums.ConnectionType targetPos)
         {
-            var newBlock = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
-            var childSystem = newBlock.GetComponent<ChildBlockSystem>();
+            var newObj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
+            var childSystem = newObj.GetComponent<ChildBlockSystem>();
 
             childSystem.Initialize(targetPos, sourceBlock.transform.localPosition, sourceBlock.transform.localScale);
             childSystem.SetBlockColor(sourceBlock.blockColor);
@@ -410,7 +377,7 @@ namespace _TheGame._Scripts.Block
                                          targetConnectionData.positionOffset.y, 0);
 
                 sourceBlock.transform.DOLocalMove(targetSourcePos, 0.3f).SetEase(Ease.OutBack);
-                newBlock.transform.DOLocalMove(targetClonePos, 0.3f).SetEase(Ease.OutBack);
+                newObj.transform.DOLocalMove(targetClonePos, 0.3f).SetEase(Ease.OutBack);
 
                 var targetSourceScale = new Vector3(
                     sourceConnectionData.scaleAdjustment.x,
@@ -423,7 +390,7 @@ namespace _TheGame._Scripts.Block
                     0.975f);
 
                 sourceBlock.transform.DOScale(targetSourceScale, 0.3f).SetEase(Ease.OutBack);
-                newBlock.transform.DOScale(targetCloneScale, 0.3f).SetEase(Ease.OutBack);
+                newObj.transform.DOScale(targetCloneScale, 0.3f).SetEase(Ease.OutBack);
             }
             else
             {
@@ -445,9 +412,34 @@ namespace _TheGame._Scripts.Block
                 Enums.ConnectionType.TopRight => Enums.BlockPositionType.TopRight,
                 Enums.ConnectionType.BottomLeft => Enums.BlockPositionType.BottomLeft,
                 Enums.ConnectionType.BottomRight => Enums.BlockPositionType.BottomRight,
-                _ => Enums.BlockPositionType.TopLeft
+                _ => Enums.BlockPositionType.None
             };
         }
+
+
+        public void CheckIfEmpty()
+        {
+            if (_childBlockMap.Count == 0)
+            {
+                var col = positionData.x;
+                var row = positionData.y;
+
+                if (_boardGrid != null)
+                {
+                    _boardGrid.UnregisterBlockSystem(col, row);
+                    _boardGrid.SetPositionEmpty(row, col);
+                }
+
+                Destroy(gameObject);
+
+                if (_boardGrid != null)
+                {
+                    _boardGrid.ApplyGravity(col);
+                }
+            }
+        }
+
+        #endregion
 
         private void OnDestroy()
         {

@@ -1,6 +1,7 @@
 using _TheGame._Scripts.Data;
 using _TheGame._Scripts.Helpers;
 using _TheGame._Scripts.References;
+using _TheGame._Scripts.Managers; 
 using UnityEngine;
 
 namespace _TheGame._Scripts.Block
@@ -88,7 +89,7 @@ namespace _TheGame._Scripts.Block
             {
                 _currentActiveBlock.OnBlockPlaced -= HandleBlockPlaced;
             }
-            CreateNewBlock();
+            BoardFlowManager.Instance.StartFullFlowWithCallback(CreateNewBlock);
         }
     }
 }

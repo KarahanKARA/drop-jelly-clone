@@ -93,7 +93,6 @@ namespace _TheGame._Scripts.Block
                             blockSystem
                         );
                         OnBlockPlaced?.Invoke();
-                        blockSystem.CheckSameColorAsNeighbors();
                     });
             });
         }
@@ -101,10 +100,8 @@ namespace _TheGame._Scripts.Block
         private int FindNearestColumn(float xPosition)
         {
             var firstColumnPos = ComponentReferences.Instance.boardGrid.GetPosition(0, 0);
-            
             var relativeX = xPosition - firstColumnPos.x;
             var column = Mathf.RoundToInt(relativeX / GameData.ColumnWidth);
-            
             return Mathf.Clamp(column, 0, 5);
         }
     }

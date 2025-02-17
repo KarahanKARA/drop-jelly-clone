@@ -8,11 +8,11 @@ namespace _TheGame._Scripts.Block
     {
         public bool IsConnected => isConnected;
         public Enums.ConnectionType ConnectedWith => connectedWith;
-        
+
         [Header("Block Properties")]
         public Enums.ConnectionType position;
         public Enums.BlockColorType blockColor;
-        
+
         [Header("Connection Info")]
         [SerializeField] private bool isConnected;
         [SerializeField] private Enums.ConnectionType connectedWith;
@@ -22,6 +22,7 @@ namespace _TheGame._Scripts.Block
         private Vector3 _originalScale;
 
         public bool isBigSquare = false;
+
         private void Awake()
         {
             _meshRenderer = GetComponent<MeshRenderer>();
@@ -56,6 +57,7 @@ namespace _TheGame._Scripts.Block
 
         public void SetConnection(Enums.ConnectionType targetPosition)
         {
+            if (isBigSquare) return; 
             isConnected = true;
             connectedWith = targetPosition;
             ApplyConnectionTransform();
@@ -70,7 +72,7 @@ namespace _TheGame._Scripts.Block
 
         private void ApplyConnectionTransform()
         {
-            var connectionData = DataManager.Instance.GetConnectionData(position); 
+            var connectionData = DataManager.Instance.GetConnectionData(position);
             if (connectionData != null)
             {
                 transform.localScale = new Vector3(

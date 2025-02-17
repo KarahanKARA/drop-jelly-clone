@@ -1,6 +1,7 @@
 using System;
 using _TheGame._Scripts.Block;
 using _TheGame._Scripts.Data;
+using DG.Tweening;
 using UnityEngine;
 
 namespace _TheGame._Scripts.Board
@@ -116,6 +117,57 @@ namespace _TheGame._Scripts.Board
         {
             return IsValidPosition(row, col) && _boardPositions[row, col].IsOccupied;
         }
+        
+        public void ApplyGravity(int col)
+        {
+            // Aşağıdan yukarıya doğru kontrol edelim
+            for (int row = GameData.BoardSize - 1; row >= 0; row--)
+            {
+                // Bu satır boş mu?
+                if (blockSystemGrid[col, row] == null)
+                {
+                    // Üst satırlardan ilk dolu blockSystem'i bul
+                    for (int rowAbove = row - 1; rowAbove >= 0; rowAbove--)
+                    {
+                        if (blockSystemGrid[col, rowAbove] != null)
+                        {
+                            // Bunu "row" konumuna indir
+                            MoveBlockSystemDown(col, rowAbove, row);
+                            break; // Bir block indirdik, bu satır artık dolu
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// blockSystem'i (col, rowAbove) konumundan alıp (col, rowTarget) konumuna taşır
+        /// ve grid kayıtlarını günceller. Tween animasyonu da ekleyebilirsin.
+        /// </summary>
+        private void MoveBlockSystemDown(int col, int rowAbove, int rowTarget)
+        {
+            var blockSys = blockSystemGrid[col, rowAbove];
+            blockSystemGrid[col, rowAbove] = null;
+            blockSystemGrid[col, rowTarget] = blockSys;
+
+            // Kaydet
+            SetPositionEmpty(rowAbove, col);
+            SetPositionOccupied(rowTarget, col);
+
+            // BlockSystem'in positionData'yı güncelle
+            blockSys.positionData = new Vector2Int(col, rowTarget);
+
+            // Şimdi animasyonla sahnede de hareket ettirelim
+            var targetPos = new Vector3(_boardPositions[rowTarget, col].X,
+                _boardPositions[rowTarget, col].Y,
+                blockSys.transform.position.z);
+
+            // DOTween veya direkt set
+            blockSys.transform.DOMove(targetPos, 0.3f).SetEase(Ease.OutBounce);
+
+            Debug.Log($"Moved blockSystem from row={rowAbove} down to row={rowTarget}, col={col}");
+        }
+
 
         public Vector2[] GetColumnPositions(int col)
         {

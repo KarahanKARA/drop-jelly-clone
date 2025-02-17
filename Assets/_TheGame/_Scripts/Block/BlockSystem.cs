@@ -33,6 +33,69 @@ namespace _TheGame._Scripts.Block
         }
 
 
+        private void TryMakeBigSquareIfSingleColor()
+        {
+            if (_childBlockMap.Count >= 4) return;
+
+            if (_childBlockMap.Count == 0) return;
+
+            var remainingBlocks = _childBlockMap.Values.ToList();
+            var firstColor = remainingBlocks[0].blockColor;
+            foreach (var cb in remainingBlocks)
+            {
+                if (cb.blockColor != firstColor)
+                {
+                    return;
+                }
+            }
+
+            var allPositions = new[]
+            {
+                Enums.ConnectionType.TopLeft,
+                Enums.ConnectionType.TopRight,
+                Enums.ConnectionType.BottomLeft,
+                Enums.ConnectionType.BottomRight
+            };
+
+            foreach (var pos in allPositions)
+            {
+                if (!_childBlockMap.ContainsKey(pos))
+                {
+                    CreateChildBlockForBigSquare(pos, firstColor);
+                }
+            }
+
+            foreach (var childBlock in _childBlockMap.Values)
+            {
+                childBlock.isBigSquare = true;
+                childBlock.RemoveConnection();
+            }
+        }
+
+        private void CreateChildBlockForBigSquare(Enums.ConnectionType positionType, Enums.BlockColorType color)
+        {
+            var childObj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
+            var childBlockSystem = childObj.GetComponent<ChildBlockSystem>();
+
+            var blockPosType = GetBlockPositionType(positionType);
+            var shapeData = DataManager.Instance.blockShapeScaleAndLocalPosList.Find(
+                x => x.blockPositionType == blockPosType);
+
+            if (shapeData != null)
+            {
+                var initialPos = new Vector3(shapeData.localPos.x, shapeData.localPos.y, 0f);
+                var initialScale = new Vector3(shapeData.localScale.x, shapeData.localScale.y, 1f);
+
+                childBlockSystem.Initialize(positionType, initialPos, initialScale);
+                childBlockSystem.SetBlockColor(color);
+
+                childBlockSystem.isBigSquare = true;
+
+                _childBlockMap[positionType] = childBlockSystem;
+            }
+        }
+
+
         public void CheckSameColorAsNeighbors()
         {
             if (_boardGrid == null) return;
@@ -158,11 +221,40 @@ namespace _TheGame._Scripts.Block
             foreach (var blockSystem in blockSystemsToExpand)
             {
                 blockSystem.CheckExpand();
+                blockSystem.TryMakeBigSquareIfSingleColor(); 
+                blockSystem.CheckIfEmpty(); 
             }
 
             blockSystemsToExpand.Clear();
         }
 
+        public void CheckIfEmpty()
+        {
+            if (_childBlockMap.Count == 0)
+            {
+                Debug.Log($"BlockSystem {positionData} is empty => remove from grid & apply gravity");
+                var col = positionData.x;
+                var row = positionData.y;
+
+                // Kendi kaydını sil
+                if (_boardGrid != null)
+                {
+                    _boardGrid.UnregisterBlockSystem(col, row);
+                    // GridPosition'u boş olarak işaretlemek istersen:
+                    _boardGrid.SetPositionEmpty(row, col);
+                }
+
+                // Kendini yok et (GameObject)
+                Destroy(this.gameObject);
+
+                // Şimdi gravity
+                if (_boardGrid != null)
+                {
+                    _boardGrid.ApplyGravity(col);
+                }
+            }
+        }
+        
 
         public void CheckExpand()
         {
@@ -203,14 +295,16 @@ namespace _TheGame._Scripts.Block
         {
             var remainingBlocks = _childBlockMap.Values.ToList();
 
-            var sourceBlock = remainingBlocks.FirstOrDefault(block => 
+            var sourceBlock = remainingBlocks.FirstOrDefault(block =>
             {
                 if (block.IsConnected) return false;
 
                 return (block.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.TopRight) ||
                        (block.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.TopLeft) ||
-                       (block.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.BottomRight) ||
-                       (block.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.BottomLeft);
+                       (block.position == Enums.ConnectionType.BottomLeft &&
+                        emptyPos == Enums.ConnectionType.BottomRight) ||
+                       (block.position == Enums.ConnectionType.BottomRight &&
+                        emptyPos == Enums.ConnectionType.BottomLeft);
             });
 
             if (sourceBlock != null)
@@ -263,14 +357,18 @@ namespace _TheGame._Scripts.Block
         {
             var remainingBlocks = _childBlockMap.Values.ToList();
 
-            var sourceBlock = remainingBlocks.FirstOrDefault(block => 
+            var sourceBlock = remainingBlocks.FirstOrDefault(block =>
             {
                 if (block.IsConnected) return false;
 
-                return (block.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.BottomLeft) ||
-                       (block.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.BottomRight) ||
-                       (block.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.TopLeft) ||
-                       (block.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.TopRight);
+                return (block.position == Enums.ConnectionType.TopLeft &&
+                        emptyPos == Enums.ConnectionType.BottomLeft) ||
+                       (block.position == Enums.ConnectionType.TopRight &&
+                        emptyPos == Enums.ConnectionType.BottomRight) ||
+                       (block.position == Enums.ConnectionType.BottomLeft &&
+                        emptyPos == Enums.ConnectionType.TopLeft) ||
+                       (block.position == Enums.ConnectionType.BottomRight &&
+                        emptyPos == Enums.ConnectionType.TopRight);
             });
 
             if (sourceBlock != null)
@@ -326,7 +424,6 @@ namespace _TheGame._Scripts.Block
 
                 sourceBlock.transform.DOScale(targetSourceScale, 0.3f).SetEase(Ease.OutBack);
                 newBlock.transform.DOScale(targetCloneScale, 0.3f).SetEase(Ease.OutBack);
-
             }
             else
             {

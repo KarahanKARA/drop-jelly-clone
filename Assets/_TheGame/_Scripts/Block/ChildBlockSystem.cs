@@ -20,7 +20,8 @@ namespace _TheGame._Scripts.Block
         private MeshRenderer _meshRenderer;
         private Vector3 _originalPosition;
         private Vector3 _originalScale;
-        
+
+        public bool isBigSquare = false;
         private void Awake()
         {
             _meshRenderer = GetComponent<MeshRenderer>();

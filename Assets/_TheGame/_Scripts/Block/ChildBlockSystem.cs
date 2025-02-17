@@ -24,20 +24,17 @@ namespace _TheGame._Scripts.Block
             _meshRenderer = GetComponent<MeshRenderer>();
         }
 
-        // İlk üretildiğinde çağrılacak
         public void Initialize(Enums.ConnectionType positionType, Vector3 initialPos, Vector3 initialScale)
         {
             SetPosition(positionType);
             SetInitialTransform(initialPos, initialScale);
         }
 
-        // Pozisyon tipini ayarla
         private void SetPosition(Enums.ConnectionType positionType)
         {
             position = positionType;
         }
 
-        // İlk transform değerlerini ayarla
         private void SetInitialTransform(Vector3 initialPos, Vector3 initialScale)
         {
             _originalPosition = initialPos;
@@ -46,7 +43,6 @@ namespace _TheGame._Scripts.Block
             transform.localScale = initialScale;
         }
 
-        // Renk ayarla
         public void SetBlockColor(Enums.BlockColorType blockColorType)
         {
             blockColor = blockColorType;
@@ -55,7 +51,6 @@ namespace _TheGame._Scripts.Block
             _meshRenderer.materials = new[] { materialInstance };
         }
 
-        // Connection işlemleri
         public void SetConnection(Enums.ConnectionType targetPosition)
         {
             isConnected = true;
@@ -70,33 +65,24 @@ namespace _TheGame._Scripts.Block
             ResetTransform();
         }
 
-        // Connection transform değişikliklerini uygula
         private void ApplyConnectionTransform()
         {
-            var connectionData = DataManager.Instance.GetConnectionData(position); // Kendi pozisyonuna göre offset al
+            var connectionData = DataManager.Instance.GetConnectionData(position); 
             if (connectionData != null)
             {
-                // Scale'i direkt set et
                 transform.localScale = new Vector3(
                     connectionData.scaleAdjustment.x,
                     connectionData.scaleAdjustment.y,
                     0.975f
                 );
 
-                // Position için offset ekle
-                Vector3 newPosition = _originalPosition;
+                var newPosition = _originalPosition;
                 newPosition.x += connectionData.positionOffset.x;
                 newPosition.y += connectionData.positionOffset.y;
                 transform.localPosition = newPosition;
-
-                Debug.Log($"Connection applied for {position} with {connectedWith}:");
-                Debug.Log($"Original Position: {_originalPosition}");
-                Debug.Log($"Applied Offset: {connectionData.positionOffset}");
-                Debug.Log($"New Position: {newPosition}");
             }
         }
 
-        // Transform'u orijinal haline döndür
         private void ResetTransform()
         {
             transform.localPosition = _originalPosition;

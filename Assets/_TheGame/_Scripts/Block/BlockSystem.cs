@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using _TheGame._Scripts.Board;
 using _TheGame._Scripts.Data;
@@ -9,8 +8,6 @@ using UnityEngine;
 
 namespace _TheGame._Scripts.Block
 {
-    
-    
     public class BlockSystem : MonoBehaviour
     {
         public List<BlockDataModel.ChildBlockData> childBlockDataList = new List<BlockDataModel.ChildBlockData>();
@@ -43,14 +40,10 @@ namespace _TheGame._Scripts.Block
                 var initialPos = new Vector3(shapeData.localPos.x, shapeData.localPos.y, 0f);
                 var initialScale = new Vector3(shapeData.localScale.x, shapeData.localScale.y, 1f);
         
-                // Sırasıyla:
-                // 1. Initialize et (pozisyon ve transform)
                 childBlockSystem.Initialize(positionType, initialPos, initialScale);
         
-                // 2. Rengi ayarla
                 childBlockSystem.SetBlockColor(colorType);
 
-                // 3. Eğer bağlantı varsa, bağlantıyı kur
                 if (connectedWith != Enums.ConnectionType.None)
                 {
                     childBlockSystem.SetConnection(connectedWith);
@@ -68,7 +61,7 @@ namespace _TheGame._Scripts.Block
                 Enums.ConnectionType.TopRight => Enums.BlockPositionType.TopRight,
                 Enums.ConnectionType.BottomLeft => Enums.BlockPositionType.BottomLeft,
                 Enums.ConnectionType.BottomRight => Enums.BlockPositionType.BottomRight,
-                _ => Enums.BlockPositionType.TopLeft // default değer
+                _ => Enums.BlockPositionType.TopLeft 
             };
         }
 

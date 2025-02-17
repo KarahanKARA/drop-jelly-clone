@@ -1,4 +1,3 @@
-using _TheGame._Scripts.Data;
 using _TheGame._Scripts.Helpers;
 using _TheGame._Scripts.Managers;
 using UnityEngine;
@@ -7,6 +6,9 @@ namespace _TheGame._Scripts.Block
 {
     public class ChildBlockSystem : MonoBehaviour
     {
+        public bool IsConnected => isConnected;
+        public Enums.ConnectionType ConnectedWith => connectedWith;
+        
         [Header("Block Properties")]
         public Enums.ConnectionType position;
         public Enums.BlockColorType blockColor;

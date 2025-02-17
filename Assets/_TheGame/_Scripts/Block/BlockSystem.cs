@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using _TheGame._Scripts.Board;
 using _TheGame._Scripts.Data;
@@ -10,22 +11,142 @@ namespace _TheGame._Scripts.Block
 {
     public class BlockSystem : MonoBehaviour
     {
+        private const int BoardSize = GameData.BoardSize; 
+
         public List<BlockDataModel.ChildBlockData> childBlockDataList = new List<BlockDataModel.ChildBlockData>();
-        private Dictionary<Enums.ConnectionType, ChildBlockSystem> childBlockMap = new Dictionary<Enums.ConnectionType, ChildBlockSystem>();
-        
-        [Header("FORMAT : COLUMN, ROW")]
+
+        private readonly Dictionary<Enums.ConnectionType, ChildBlockSystem> _childBlockMap 
+            = new Dictionary<Enums.ConnectionType, ChildBlockSystem>();
+
+        [Header("FORMAT : COLUMN, ROW")] 
         public Vector2Int positionData = new Vector2Int();
 
         private BoardGrid _boardGrid;
-        
+
         private void OnEnable()
         {
             _boardGrid = ComponentReferences.Instance.boardGrid;
             positionData = new Vector2Int(-10, -10);
         }
+
+        public void CheckSameColorAsNeighbors()
+        {
+            if (_boardGrid == null) return;
+
+            var blocksToDestroy = new HashSet<ChildBlockSystem>();
+
+            foreach (var kvp in _childBlockMap)
+            {
+                var childBlock = kvp.Value;
+                var neighbors = GetExactNeighborBlocks(childBlock);
+
+                foreach (var neighbor in neighbors)
+                {
+                    if (neighbor != null && neighbor.blockColor == childBlock.blockColor)
+                    {
+                        blocksToDestroy.Add(childBlock);
+                        blocksToDestroy.Add(neighbor);
+                        FindConnectedBlocksToDestroy(childBlock, blocksToDestroy); 
+                        FindConnectedBlocksToDestroy(neighbor, blocksToDestroy);   
+                    }
+                }
+            }
+
+            if (blocksToDestroy.Count > 0)
+            {
+                DestroyMatchingBlocks(blocksToDestroy);
+            }
+        }
+
         
-        public void CreateChildBlock(Enums.ConnectionType positionType, 
-            Enums.BlockColorType colorType, 
+        private List<ChildBlockSystem> GetExactNeighborBlocks(ChildBlockSystem childBlock)
+        {
+            var neighbors = new List<ChildBlockSystem>();
+
+            var x = positionData.x;
+            var y = positionData.y;
+
+
+            switch (childBlock.position)
+            {
+                case Enums.ConnectionType.TopLeft:
+                    if (x - 1 >= 0)
+                        neighbors.Add(GetChildBlockAt(x - 1, y, Enums.ConnectionType.TopRight));
+
+                    if (y - 1 >= 0)
+                        neighbors.Add(GetChildBlockAt(x, y - 1, Enums.ConnectionType.BottomLeft));
+                    break;
+
+                case Enums.ConnectionType.TopRight:
+                    if (x + 1 < BoardSize)
+                        neighbors.Add(GetChildBlockAt(x + 1, y, Enums.ConnectionType.TopLeft));
+
+                    if (y - 1 >= 0)
+                        neighbors.Add(GetChildBlockAt(x, y - 1, Enums.ConnectionType.BottomRight));
+                    break;
+
+                case Enums.ConnectionType.BottomLeft:
+                    if (x - 1 >= 0)
+                        neighbors.Add(GetChildBlockAt(x - 1, y, Enums.ConnectionType.BottomRight));
+
+                    if (y + 1 < BoardSize)
+                        neighbors.Add(GetChildBlockAt(x, y + 1, Enums.ConnectionType.TopLeft));
+                    break;
+
+                case Enums.ConnectionType.BottomRight:
+                    if (x + 1 < BoardSize)
+                        neighbors.Add(GetChildBlockAt(x + 1, y, Enums.ConnectionType.BottomLeft));
+
+                    if (y + 1 < BoardSize)
+                        neighbors.Add(GetChildBlockAt(x, y + 1, Enums.ConnectionType.TopRight));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return neighbors;
+        }
+
+
+        private ChildBlockSystem GetChildBlockAt(int x, int y, Enums.ConnectionType childPosition)
+        {
+            var neighborBlockSystem = _boardGrid.GetBlockSystemAt(x, y);
+            if (neighborBlockSystem == null) return null;
+
+            return neighborBlockSystem._childBlockMap.GetValueOrDefault(childPosition);
+        }
+
+        private void FindConnectedBlocksToDestroy(ChildBlockSystem block, HashSet<ChildBlockSystem> blocksToDestroy)
+        {
+            if (block.IsConnected)
+            {
+                var connectedBlock = GetConnectedBlock(block);
+                if (connectedBlock != null)
+                {
+                    blocksToDestroy.Add(connectedBlock);
+                }
+            }
+        }
+
+        private void DestroyMatchingBlocks(HashSet<ChildBlockSystem> blocksToDestroy)
+        {
+            foreach (var block in blocksToDestroy)
+            {
+                Destroy(block.gameObject);
+            }
+        }
+
+        private ChildBlockSystem GetConnectedBlock(ChildBlockSystem block)
+        {
+            if (block == null || !block.IsConnected) return null;
+
+            var parentBlockSystem = block.transform.parent.GetComponent<BlockSystem>();
+            if (parentBlockSystem == null) return null;
+
+            return parentBlockSystem._childBlockMap.GetValueOrDefault(block.ConnectedWith);
+        }
+
+        public void CreateChildBlock(Enums.ConnectionType positionType, Enums.BlockColorType colorType,
             Enums.ConnectionType connectedWith)
         {
             var childObj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
@@ -39,9 +160,8 @@ namespace _TheGame._Scripts.Block
             {
                 var initialPos = new Vector3(shapeData.localPos.x, shapeData.localPos.y, 0f);
                 var initialScale = new Vector3(shapeData.localScale.x, shapeData.localScale.y, 1f);
-        
+
                 childBlockSystem.Initialize(positionType, initialPos, initialScale);
-        
                 childBlockSystem.SetBlockColor(colorType);
 
                 if (connectedWith != Enums.ConnectionType.None)
@@ -49,7 +169,7 @@ namespace _TheGame._Scripts.Block
                     childBlockSystem.SetConnection(connectedWith);
                 }
 
-                childBlockMap[positionType] = childBlockSystem;
+                _childBlockMap[positionType] = childBlockSystem;
             }
         }
 
@@ -61,101 +181,16 @@ namespace _TheGame._Scripts.Block
                 Enums.ConnectionType.TopRight => Enums.BlockPositionType.TopRight,
                 Enums.ConnectionType.BottomLeft => Enums.BlockPositionType.BottomLeft,
                 Enums.ConnectionType.BottomRight => Enums.BlockPositionType.BottomRight,
-                _ => Enums.BlockPositionType.TopLeft 
+                _ => Enums.BlockPositionType.TopLeft
             };
         }
 
-        public void CheckSameColorAsNeighbors()
-        {
-            var boardGrid = ComponentReferences.Instance.boardGrid;
-        
-            if (positionData.x != 0) // SOL BLOK KONTROLÜ
-            {
-                var leftBlock = boardGrid.GetBlockSystemAt(positionData.x - 1, positionData.y);
-                if (leftBlock != null)
-                {
-                    CompareAndConnectBlocks(leftBlock, Enums.ConnectionType.TopLeft);
-                }
-            }
-        }
-        
-        public void UpdateChildBlockPosition(Enums.ConnectionType positionType, bool isConnected)
-        {
-            if (childBlockMap.TryGetValue(positionType, out var childBlock))
-            {
-                var shapeData = DataManager.Instance.blockShapeScaleAndLocalPosList.Find(
-                    x => x.blockPositionType == (Enums.BlockPositionType)positionType);
-
-                if (shapeData != null)
-                {
-                    Vector3 targetPos = new Vector3(shapeData.localPos.x, shapeData.localPos.y, 0f);
-                    Vector3 targetScale = new Vector3(shapeData.localScale.x, shapeData.localScale.y, 1f);
-
-                    if (isConnected)
-                    {
-                        if (targetPos.x < 0) targetPos.x += 0.0125f;
-                        else if (targetPos.x > 0) targetPos.x -= 0.0125f;
-
-                        if (targetPos.y > 0) targetPos.y -= 0.0125f;
-                        else if (targetPos.y < 0) targetPos.y += 0.0125f;
-
-                        targetScale *= 0.975f;
-                    }
-
-                    childBlock.transform.localPosition = targetPos;
-                    childBlock.transform.localScale = targetScale;
-                }
-            }
-        }
-        
-        private void CompareAndConnectBlocks(BlockSystem otherBlock, Enums.ConnectionType connectionType)
-        {
-            foreach (var myChild in childBlockDataList)
-            {
-                foreach (var otherChild in otherBlock.childBlockDataList)
-                {
-                    if (myChild.blockColorType == otherChild.blockColorType)
-                    {
-                        myChild.isConnected = true;
-                        myChild.connectionType = connectionType;
-                        otherChild.isConnected = true;
-                        otherChild.connectionType = GetOppositeConnectionType(connectionType);
-                    
-                        // Visual update
-                        // TODO: Child block referanslarını düzgün şekilde tutup güncellemek gerekiyor
-                    }
-                }
-            }
-        }
-        
-        private Enums.ConnectionType GetOppositeConnectionType(Enums.ConnectionType type)
-        {
-            return type switch
-            {
-                Enums.ConnectionType.TopLeft => Enums.ConnectionType.TopRight,
-                Enums.ConnectionType.TopRight => Enums.ConnectionType.TopLeft,
-                Enums.ConnectionType.BottomLeft => Enums.ConnectionType.BottomRight,
-                Enums.ConnectionType.BottomRight => Enums.ConnectionType.BottomLeft,
-                _ => Enums.ConnectionType.None
-            };
-        }
-        
-        
         private void OnDestroy()
         {
             if (_boardGrid != null)
             {
-                _boardGrid.UnregisterBlockSystem(
-                    positionData.x, 
-                    positionData.y
-                );
+                _boardGrid.UnregisterBlockSystem(positionData.x, positionData.y);
             }
-        }
-        
-        private void OnDrawGizmos()
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireCube(transform.position,Vector3.one * 2);
         }
     }
 }

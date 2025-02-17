@@ -74,6 +74,81 @@
           "connectedWith": null
         }
       ]
+    },
+    {
+      "id": 4,
+      "children": [
+        {
+          "position": "TopLeft",
+          "color": "Green",
+          "connectedWith": "TopRight"
+        },
+        {
+          "position": "TopRight",
+          "color": "Green",
+          "connectedWith": "TopLeft"
+        },
+        {
+          "position": "BottomLeft",
+          "color": "Yellow",
+          "connectedWith": null
+        },
+        {
+          "position": "BottomRight",
+          "color": "Red",
+          "connectedWith": null
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "children": [
+        {
+          "position": "TopLeft",
+          "color": "Green",
+          "connectedWith": "TopRight"
+        },
+        {
+          "position": "TopRight",
+          "color": "Green",
+          "connectedWith": "TopLeft"
+        },
+        {
+          "position": "BottomLeft",
+          "color": "Yellow",
+          "connectedWith": null
+        },
+        {
+          "position": "BottomRight",
+          "color": "Red",
+          "connectedWith": null
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "children": [
+        {
+          "position": "TopLeft",
+          "color": "Green",
+          "connectedWith": "TopRight"
+        },
+        {
+          "position": "TopRight",
+          "color": "Green",
+          "connectedWith": "TopLeft"
+        },
+        {
+          "position": "BottomLeft",
+          "color": "Yellow",
+          "connectedWith": null
+        },
+        {
+          "position": "BottomRight",
+          "color": "Red",
+          "connectedWith": null
+        }
+      ]
     }
   ]
 }

@@ -1,25 +1,28 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using _TheGame._Scripts.Board;
 using _TheGame._Scripts.Data;
 using _TheGame._Scripts.Helpers;
 using _TheGame._Scripts.Managers;
 using _TheGame._Scripts.References;
+using DG.Tweening;
 using UnityEngine;
 
 namespace _TheGame._Scripts.Block
 {
     public class BlockSystem : MonoBehaviour
     {
-        private const int BoardSize = GameData.BoardSize; 
+        private const int BoardSize = GameData.BoardSize;
 
         public List<BlockDataModel.ChildBlockData> childBlockDataList = new List<BlockDataModel.ChildBlockData>();
 
-        private readonly Dictionary<Enums.ConnectionType, ChildBlockSystem> _childBlockMap 
+        private readonly Dictionary<Enums.ConnectionType, ChildBlockSystem> _childBlockMap
             = new Dictionary<Enums.ConnectionType, ChildBlockSystem>();
 
-        [Header("FORMAT : COLUMN, ROW")] 
-        public Vector2Int positionData = new Vector2Int();
+        private static HashSet<BlockSystem> blockSystemsToExpand = new HashSet<BlockSystem>();
+
+        [Header("FORMAT : COLUMN, ROW")] public Vector2Int positionData = new Vector2Int();
 
         private BoardGrid _boardGrid;
 
@@ -28,6 +31,7 @@ namespace _TheGame._Scripts.Block
             _boardGrid = ComponentReferences.Instance.boardGrid;
             positionData = new Vector2Int(-10, -10);
         }
+
 
         public void CheckSameColorAsNeighbors()
         {
@@ -46,8 +50,8 @@ namespace _TheGame._Scripts.Block
                     {
                         blocksToDestroy.Add(childBlock);
                         blocksToDestroy.Add(neighbor);
-                        FindConnectedBlocksToDestroy(childBlock, blocksToDestroy); 
-                        FindConnectedBlocksToDestroy(neighbor, blocksToDestroy);   
+                        FindConnectedBlocksToDestroy(childBlock, blocksToDestroy);
+                        FindConnectedBlocksToDestroy(neighbor, blocksToDestroy);
                     }
                 }
             }
@@ -58,7 +62,7 @@ namespace _TheGame._Scripts.Block
             }
         }
 
-        
+
         private List<ChildBlockSystem> GetExactNeighborBlocks(ChildBlockSystem childBlock)
         {
             var neighbors = new List<ChildBlockSystem>();
@@ -128,12 +132,94 @@ namespace _TheGame._Scripts.Block
             }
         }
 
+
         private void DestroyMatchingBlocks(HashSet<ChildBlockSystem> blocksToDestroy)
         {
             foreach (var block in blocksToDestroy)
             {
+                var parentSystem = block.transform.parent.GetComponent<BlockSystem>();
+                if (parentSystem != null)
+                {
+                    blockSystemsToExpand.Add(parentSystem);
+                }
+            }
+
+            foreach (var block in blocksToDestroy)
+            {
+                var parentSystem = block.transform.parent.GetComponent<BlockSystem>();
+                if (parentSystem != null)
+                {
+                    parentSystem._childBlockMap.Remove(block.position);
+                }
+
                 Destroy(block.gameObject);
             }
+
+            foreach (var blockSystem in blockSystemsToExpand)
+            {
+                blockSystem.CheckExpand();
+            }
+
+            blockSystemsToExpand.Clear();
+        }
+
+
+        public void CheckExpand()
+        {
+            var emptyPositions = new List<Enums.ConnectionType>();
+            foreach (Enums.ConnectionType pos in Enum.GetValues(typeof(Enums.ConnectionType)))
+            {
+                if (pos != Enums.ConnectionType.None && !_childBlockMap.ContainsKey(pos))
+                {
+                    emptyPositions.Add(pos);
+                }
+            }
+
+            if (emptyPositions.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var emptyPos in emptyPositions)
+            {
+                if (TryExpandVertically(emptyPos))
+                {
+                    continue;
+                }
+
+                if (TryExpandHorizontally(emptyPos))
+                {
+                    Debug.Log($"Horizontal expand successful for {emptyPos}");
+                }
+                else
+                {
+                    Debug.Log($"No expansion possible for {emptyPos}");
+                }
+            }
+        }
+
+
+        private bool TryExpandHorizontally(Enums.ConnectionType emptyPos)
+        {
+            var remainingBlocks = _childBlockMap.Values.ToList();
+
+            var sourceBlock = remainingBlocks.FirstOrDefault(block => 
+            {
+                if (block.IsConnected) return false;
+
+                return (block.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.TopRight) ||
+                       (block.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.TopLeft) ||
+                       (block.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.BottomRight) ||
+                       (block.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.BottomLeft);
+            });
+
+            if (sourceBlock != null)
+            {
+                CloneAndMove(sourceBlock, emptyPos);
+                return true;
+            }
+
+            return false;
         }
 
         private ChildBlockSystem GetConnectedBlock(ChildBlockSystem block)
@@ -171,6 +257,87 @@ namespace _TheGame._Scripts.Block
 
                 _childBlockMap[positionType] = childBlockSystem;
             }
+        }
+
+        private bool TryExpandVertically(Enums.ConnectionType emptyPos)
+        {
+            var remainingBlocks = _childBlockMap.Values.ToList();
+
+            var sourceBlock = remainingBlocks.FirstOrDefault(block => 
+            {
+                if (block.IsConnected) return false;
+
+                return (block.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.BottomLeft) ||
+                       (block.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.BottomRight) ||
+                       (block.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.TopLeft) ||
+                       (block.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.TopRight);
+            });
+
+            if (sourceBlock != null)
+            {
+                CloneAndMove(sourceBlock, emptyPos);
+                return true;
+            }
+
+            return false;
+        }
+
+        private void CloneAndMove(ChildBlockSystem sourceBlock, Enums.ConnectionType targetPos)
+        {
+            var newBlock = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
+            var childSystem = newBlock.GetComponent<ChildBlockSystem>();
+
+            childSystem.Initialize(targetPos, sourceBlock.transform.localPosition, sourceBlock.transform.localScale);
+            childSystem.SetBlockColor(sourceBlock.blockColor);
+
+            var targetPosData = DataManager.Instance.blockShapeScaleAndLocalPosList.Find(
+                x => x.blockPositionType == GetBlockPositionType(targetPos));
+
+            if (targetPosData != null)
+            {
+                var sourceConnectionData = DataManager.Instance.GetConnectionData(sourceBlock.position);
+                var targetConnectionData = DataManager.Instance.GetConnectionData(targetPos);
+
+                if (sourceConnectionData == null || targetConnectionData == null)
+                {
+                    Debug.LogError("Connection data is null!");
+                    return;
+                }
+
+                var targetSourcePos = sourceBlock.transform.localPosition +
+                                      new Vector3(sourceConnectionData.positionOffset.x,
+                                          sourceConnectionData.positionOffset.y, 0);
+                var targetClonePos = new Vector3(targetPosData.localPos.x, targetPosData.localPos.y, 0) +
+                                     new Vector3(targetConnectionData.positionOffset.x,
+                                         targetConnectionData.positionOffset.y, 0);
+
+                sourceBlock.transform.DOLocalMove(targetSourcePos, 0.3f).SetEase(Ease.OutBack);
+                newBlock.transform.DOLocalMove(targetClonePos, 0.3f).SetEase(Ease.OutBack);
+
+                var targetSourceScale = new Vector3(
+                    sourceConnectionData.scaleAdjustment.x,
+                    sourceConnectionData.scaleAdjustment.y,
+                    0.975f);
+
+                var targetCloneScale = new Vector3(
+                    targetConnectionData.scaleAdjustment.x,
+                    targetConnectionData.scaleAdjustment.y,
+                    0.975f);
+
+                sourceBlock.transform.DOScale(targetSourceScale, 0.3f).SetEase(Ease.OutBack);
+                newBlock.transform.DOScale(targetCloneScale, 0.3f).SetEase(Ease.OutBack);
+
+            }
+            else
+            {
+                Debug.LogError($"Could not find target position data for {targetPos}");
+                return;
+            }
+
+            sourceBlock.SetConnection(targetPos);
+            childSystem.SetConnection(sourceBlock.position);
+
+            _childBlockMap[targetPos] = childSystem;
         }
 
         private Enums.BlockPositionType GetBlockPositionType(Enums.ConnectionType connectionType)

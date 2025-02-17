@@ -1,5 +1,4 @@
 using System;
-using _TheGame._Scripts.Board;
 using _TheGame._Scripts.Data;
 using _TheGame._Scripts.References;
 using DG.Tweening;
@@ -22,13 +21,9 @@ namespace _TheGame._Scripts.Block
         private bool _isDragging;
         private float _fixedYPosition;
         private float _fixedZPosition;
-        private BoardGrid _boardGrid;
-        
-        private void OnEnable()
-        {
-            _boardGrid = ComponentReferences.Instance.boardGrid;
-        }
 
+        public BlockSystem blockSystem;
+        
         private void Awake()
         {
             _initialPosition = transform.position;
@@ -78,6 +73,8 @@ namespace _TheGame._Scripts.Block
                 return;
             }
 
+            blockSystem.positionData = new Vector2Int(nearestColumn, row);
+            
             transform.DOMoveX(targetPosition.x, xDuration).OnComplete(() =>
             {
                 var distance = Mathf.Abs(transform.position.y - targetPosition.y);
@@ -89,15 +86,21 @@ namespace _TheGame._Scripts.Block
                     {
                         IsPlaced = true;
                         IsMoving = false;
-                        _boardGrid.SetPositionOccupied(row, nearestColumn);
+                        ComponentReferences.Instance.boardGrid.SetPositionOccupied(row, nearestColumn);
+                        ComponentReferences.Instance.boardGrid.RegisterBlockSystem(
+                            nearestColumn, 
+                            row, 
+                            blockSystem
+                        );
                         OnBlockPlaced?.Invoke();
+                        blockSystem.CheckSameColorAsNeighbors();
                     });
             });
         }
 
         private int FindNearestColumn(float xPosition)
         {
-            var firstColumnPos = _boardGrid.GetPosition(0, 0);
+            var firstColumnPos = ComponentReferences.Instance.boardGrid.GetPosition(0, 0);
             
             var relativeX = xPosition - firstColumnPos.x;
             var column = Mathf.RoundToInt(relativeX / GameData.ColumnWidth);

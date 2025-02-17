@@ -17,20 +17,25 @@ namespace _TheGame._Scripts.Helpers
             Red = 7,
             Yellow = 8,
         }
+        
+        [Serializable]
+        public enum BlockPositionType
+        {
+            None,
+            TopLeft,
+            TopRight,
+            BottomLeft,
+            BottomRight
+        }
 
         [Serializable]
-        public enum BlockShapeType
+        public enum ConnectionType
         {
-            None = 0,
-            TopDouble = 1,
-            BottomLeft = 2,
-            BottomRight = 3,
-            TopRight = 4,
-            TopLeft = 5,
-            BottomDouble = 6,
-            LeftDouble = 7,
-            RightDouble = 8,
-            FullSquare = 9
+            None,
+            TopLeft,
+            TopRight,
+            BottomLeft,
+            BottomRight
         }
     }
 }

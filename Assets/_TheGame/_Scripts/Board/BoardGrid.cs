@@ -1,4 +1,5 @@
 using System;
+using _TheGame._Scripts.Block;
 using _TheGame._Scripts.Data;
 using UnityEngine;
 
@@ -25,13 +26,40 @@ namespace _TheGame._Scripts.Board
         public bool showGizmos = true;
         
         private GridPosition[,] _boardPositions;
-        
+        private BlockSystem[,] blockSystemGrid;
 
         private void Awake()
         {
             InitializeBoardPositions();
+            blockSystemGrid = new BlockSystem[GameData.BoardSize, GameData.BoardSize];
         }
 
+        public BlockSystem GetBlockSystemAt(int column, int row)
+        {
+            if (IsValidPosition(column, row))
+            {
+                return blockSystemGrid[column, row];
+            }
+            return null;
+        }
+        
+        
+        public void RegisterBlockSystem(int column, int row, BlockSystem blockSystem)
+        {
+            if (IsValidPosition(column, row))
+            {
+                blockSystemGrid[column, row] = blockSystem;
+            }
+        }
+
+        public void UnregisterBlockSystem(int column, int row)
+        {
+            if (IsValidPosition(column, row))
+            {
+                blockSystemGrid[column, row] = null;
+            }
+        }
+        
         private void InitializeBoardPositions()
         {
             _boardPositions = new GridPosition[GameData.BoardSize, GameData.BoardSize];
@@ -105,9 +133,10 @@ namespace _TheGame._Scripts.Board
             return positions;
         }
 
-        private bool IsValidPosition(int row, int col)
+        private bool IsValidPosition(int column, int row)
         {
-            return row >= 0 && row < GameData.BoardSize && col >= 0 && col < GameData.BoardSize;
+            return column is >= 0 and < GameData.BoardSize && 
+                   row is >= 0 and < GameData.BoardSize;
         }
 
         public Vector2 GetPosition(int row, int col)

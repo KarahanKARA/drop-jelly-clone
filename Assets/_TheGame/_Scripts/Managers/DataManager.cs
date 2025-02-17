@@ -6,6 +6,14 @@ using UnityEngine;
 namespace _TheGame._Scripts.Managers
 {
     [Serializable]
+    public class BlockConnectionData
+    {
+        public Enums.ConnectionType connectionType;
+        public Vector2 positionOffset;   
+        public Vector2 scaleAdjustment; 
+    }
+    
+    [Serializable]
     public class BlockColor
     {
         public Enums.BlockColorType blockColorType;
@@ -15,7 +23,7 @@ namespace _TheGame._Scripts.Managers
     [Serializable]
     public class BlockShapeData
     {
-        public Enums.BlockShapeType blockShapeType;
+        public Enums.BlockPositionType blockPositionType;
         public Vector2 localPos;
         public Vector2 localScale;
     }
@@ -25,15 +33,18 @@ namespace _TheGame._Scripts.Managers
         public List<BlockColor> blockColorList = new List<BlockColor>();
         public List<BlockShapeData> blockShapeScaleAndLocalPosList = new List<BlockShapeData>();
 
+        
+        public List<BlockConnectionData> connectionDataList = new List<BlockConnectionData>();
+        
+
+        public BlockConnectionData GetConnectionData(Enums.ConnectionType type)
+        {
+            return connectionDataList.Find(x => x.connectionType == type);
+        }
+        
         public Material GetMaterialByColor(Enums.BlockColorType colorType)
         {
             return blockColorList.Find(x => x.blockColorType == colorType).blockColorMaterial;
-        }
-
-        public (Vector2 scale, Vector2 position) GetShapeData(Enums.BlockShapeType shapeType)
-        {
-            var shapeData = blockShapeScaleAndLocalPosList.Find(x => x.blockShapeType == shapeType);
-            return (shapeData.localScale, shapeData.localPos);
         }
     }
 }

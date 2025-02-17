@@ -58,7 +58,6 @@ namespace _TheGame._Scripts.Systems
                 var hitPoint = ray.GetPoint(entry);
                 _lastXPosition = hitPoint.x;
         
-                // Önce referansı al
                 _currentBlockAnimation = _blockCreatorSystem.CurrentActiveBlock
                     .GetComponent<BlockHorizontalAnimation>();
             

@@ -99,6 +99,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   moveSpeed: 24
   xDuration: 0.2
+  blockSystem: {fileID: 6406227932256560624}
 --- !u!114 &6406227932256560624
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -112,6 +113,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   childBlockDataList: []
+  positionData: {x: 0, y: 0}
 --- !u!114 &-6626078165631839709
 MonoBehaviour:
   m_ObjectHideFlags: 0

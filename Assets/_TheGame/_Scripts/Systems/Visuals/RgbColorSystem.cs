@@ -29,8 +29,7 @@ namespace _TheGame._Scripts.Systems.Visuals
                 return;
             }
             
-            // İlk rengi set et (son renkten başlayarak)
-            Color startColor = GetColorFromHue(_hueValues[_hueValues.Length - 1]);
+            var startColor = GetColorFromHue(_hueValues[^1]);
             targetMaterial.color = startColor;
             
             CycleThroughColors(2f);
@@ -53,7 +52,7 @@ namespace _TheGame._Scripts.Systems.Visuals
             var firstColor = GetColorFromHue(_hueValues[0]);
             colorSequence.Append(targetMaterial.DOColor(firstColor, durationPerColor));
             
-            for (int i = 1; i < _hueValues.Length; i++)
+            for (var i = 1; i < _hueValues.Length; i++)
             {
                 var targetColor = GetColorFromHue(_hueValues[i]);
                 colorSequence.Append(targetMaterial.DOColor(targetColor, durationPerColor));

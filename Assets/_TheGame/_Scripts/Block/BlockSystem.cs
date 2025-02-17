@@ -15,7 +15,7 @@ namespace _TheGame._Scripts.Block
     {
         private const int BoardSize = GameData.BoardSize;
 
-        public Dictionary<Enums.ConnectionType, ChildBlockSystem> _childBlockMap 
+        public Dictionary<Enums.ConnectionType, ChildBlockSystem> _childBlockMap
             = new Dictionary<Enums.ConnectionType, ChildBlockSystem>();
 
         public Vector2Int positionData = new Vector2Int();
@@ -27,7 +27,8 @@ namespace _TheGame._Scripts.Block
             positionData = new Vector2Int(-10, -10);
         }
 
-        public void CreateChildBlock(Enums.ConnectionType positionType, Enums.BlockColorType colorType, Enums.ConnectionType connectedWith)
+        public void CreateChildBlock(Enums.ConnectionType positionType, Enums.BlockColorType colorType,
+            Enums.ConnectionType connectedWith)
         {
             var obj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
             var c = obj.GetComponent<ChildBlockSystem>();
@@ -44,6 +45,7 @@ namespace _TheGame._Scripts.Block
             {
                 c.SetConnection(connectedWith);
             }
+
             _childBlockMap[positionType] = c;
         }
 
@@ -53,21 +55,78 @@ namespace _TheGame._Scripts.Block
             foreach (var kvp in _childBlockMap)
             {
                 var b = kvp.Value;
-                var neighbors = GetExactNeighborBlocks(b);
-                for (var i = 0; i < neighbors.Count; i++)
+                if (b == null) continue;
+
+                if (b.isBigSquare)
                 {
-                    var n = neighbors[i];
+                    var neighbors = GetExactNeighborBlocks(b);
+                    var hasMatchingNeighbor = false;
+                    
+                    var matchingNeighbors = new List<ChildBlockSystem>();
+                    
+                    for (int i = 0; i < neighbors.Count; i++)
+                    {
+                        var n = neighbors[i];
+                        if (n != null && n.blockColor == b.blockColor)
+                        {
+                            hasMatchingNeighbor = true;
+                            matchingNeighbors.Add(n);
+                        }
+                    }
+
+                    if (hasMatchingNeighbor)
+                    {
+                        foreach (var child in _childBlockMap.Values)
+                        {
+                            set.Add(child);
+                        }
+
+                        foreach (var neighbor in matchingNeighbors)
+                        {
+                            var neighborBS = neighbor.transform.parent.GetComponent<BlockSystem>();
+                            if (neighborBS != null && neighborBS != this)
+                            {
+                                foreach (var child in neighborBS._childBlockMap.Values)
+                                {
+                                    if (child.blockColor == b.blockColor)
+                                        set.Add(child);
+                                }
+                            }
+                        }
+                    }
+
+                    continue;
+                }
+
+                var neighborBlocks = GetExactNeighborBlocks(b);
+                
+                for (var i = 0; i < neighborBlocks.Count; i++)
+                {
+                    var n = neighborBlocks[i];
                     if (n != null && n.blockColor == b.blockColor)
                     {
                         set.Add(b);
                         set.Add(n);
+
+                        var neighborBS = n.transform.parent.GetComponent<BlockSystem>();
+                        if (neighborBS != null && neighborBS != this)
+                        {
+                            foreach (var child in neighborBS._childBlockMap.Values)
+                            {
+                                if (child.blockColor == b.blockColor)
+                                    set.Add(child);
+                            }
+                        }
+
                         FindConnectedBlocksToDestroy(b, set);
                         FindConnectedBlocksToDestroy(n, set);
                     }
                 }
             }
+
             return set;
         }
+
 
         void FindConnectedBlocksToDestroy(ChildBlockSystem block, HashSet<ChildBlockSystem> set)
         {
@@ -91,6 +150,7 @@ namespace _TheGame._Scripts.Block
                 if (b == null) continue;
                 seq.Join(b.transform.DOScale(Vector3.zero, 0.3f));
             }
+
             var done = false;
             seq.OnComplete(() => done = true);
             while (!done) yield return null;
@@ -119,20 +179,14 @@ namespace _TheGame._Scripts.Block
                 var p = allPos[i];
                 if (!_childBlockMap.ContainsKey(p)) empty.Add(p);
             }
+
             if (empty.Count == 0) return;
 
             for (var i = 0; i < empty.Count; i++)
             {
                 var pos = empty[i];
                 if (TryExpandVertically(pos)) continue;
-                if (TryExpandHorizontally(pos))
-                {
-                    Debug.Log("Horizontal expand successful for " + pos);
-                }
-                else
-                {
-                    Debug.Log("No expansion possible for " + pos);
-                }
+                TryExpandHorizontally(pos);
             }
         }
 
@@ -142,10 +196,14 @@ namespace _TheGame._Scripts.Block
             var source = list.FirstOrDefault(b =>
             {
                 if (b.IsConnected) return false;
-                if (b.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.BottomLeft) return true;
-                if (b.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.BottomRight) return true;
-                if (b.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.TopLeft) return true;
-                if (b.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.TopRight) return true;
+                if (b.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.BottomLeft)
+                    return true;
+                if (b.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.BottomRight)
+                    return true;
+                if (b.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.TopLeft)
+                    return true;
+                if (b.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.TopRight)
+                    return true;
                 return false;
             });
             if (source != null)
@@ -153,30 +211,33 @@ namespace _TheGame._Scripts.Block
                 CloneAndMove(source, emptyPos);
                 return true;
             }
+
             return false;
         }
 
-        bool TryExpandHorizontally(Enums.ConnectionType emptyPos)
+        private void TryExpandHorizontally(Enums.ConnectionType emptyPos)
         {
             var list = _childBlockMap.Values.ToList();
             var source = list.FirstOrDefault(b =>
             {
                 if (b.IsConnected) return false;
-                if (b.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.TopRight) return true;
-                if (b.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.TopLeft) return true;
-                if (b.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.BottomRight) return true;
-                if (b.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.BottomLeft) return true;
+                if (b.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.TopRight)
+                    return true;
+                if (b.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.TopLeft)
+                    return true;
+                if (b.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.BottomRight)
+                    return true;
+                if (b.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.BottomLeft)
+                    return true;
                 return false;
             });
             if (source != null)
             {
                 CloneAndMove(source, emptyPos);
-                return true;
             }
-            return false;
         }
 
-        void CloneAndMove(ChildBlockSystem source, Enums.ConnectionType targetPos)
+        private void CloneAndMove(ChildBlockSystem source, Enums.ConnectionType targetPos)
         {
             var obj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
             var c = obj.GetComponent<ChildBlockSystem>();
@@ -194,8 +255,11 @@ namespace _TheGame._Scripts.Block
                     Debug.LogError("Connection data is null!");
                     return;
                 }
-                var finalPosSource = source.transform.localPosition + new Vector3(srcData.positionOffset.x, srcData.positionOffset.y, 0);
-                var finalPosClone = new Vector3(shape.localPos.x, shape.localPos.y, 0) + new Vector3(tgtData.positionOffset.x, tgtData.positionOffset.y, 0);
+
+                var finalPosSource = source.transform.localPosition +
+                                     new Vector3(srcData.positionOffset.x, srcData.positionOffset.y, 0);
+                var finalPosClone = new Vector3(shape.localPos.x, shape.localPos.y, 0) +
+                                    new Vector3(tgtData.positionOffset.x, tgtData.positionOffset.y, 0);
 
                 source.transform.DOLocalMove(finalPosSource, 0.3f).SetEase(Ease.OutBack);
                 obj.transform.DOLocalMove(finalPosClone, 0.3f).SetEase(Ease.OutBack);
@@ -210,6 +274,7 @@ namespace _TheGame._Scripts.Block
                 Debug.LogError("Could not find target position data for " + targetPos);
                 return;
             }
+
             source.SetConnection(targetPos);
             c.SetConnection(source.position);
             _childBlockMap[targetPos] = c;
@@ -226,6 +291,7 @@ namespace _TheGame._Scripts.Block
                     _boardGrid.UnregisterBlockSystem(col, row);
                     _boardGrid.SetPositionEmpty(row, col);
                 }
+
                 Destroy(gameObject);
                 if (_boardGrid != null) _boardGrid.ApplyGravity(col);
             }
@@ -233,14 +299,15 @@ namespace _TheGame._Scripts.Block
 
         public void TryMakeBigSquareIfSingleColor()
         {
-            if (_childBlockMap.Count >= 4) return;
             if (_childBlockMap.Count < 2) return;
             var list = _childBlockMap.Values.ToList();
             var c = list[0].blockColor;
+            
             for (var i = 1; i < list.Count; i++)
             {
                 if (list[i].blockColor != c) return;
             }
+
             var allPos = new[]
             {
                 Enums.ConnectionType.TopLeft,
@@ -249,48 +316,62 @@ namespace _TheGame._Scripts.Block
                 Enums.ConnectionType.BottomRight
             };
             var missing = new List<Enums.ConnectionType>();
+            
             for (var i = 0; i < allPos.Length; i++)
             {
                 var p = allPos[i];
                 if (!_childBlockMap.ContainsKey(p)) missing.Add(p);
             }
+
             if (missing.Count == 0) return;
             var source = list[0];
+            
             for (var i = 0; i < missing.Count; i++)
             {
-                CloneForBigSquare(source, missing[i], c);
+                CloneForBigSquare(missing[i], c);
             }
-            for (var i = 0; i < list.Count; i++)
+
+            foreach (var child in _childBlockMap.Values)
             {
-                list[i].isBigSquare = true;
-                list[i].RemoveConnection();
+                child.isBigSquare = true;
             }
         }
 
-        void CloneForBigSquare(ChildBlockSystem source, Enums.ConnectionType pos, Enums.BlockColorType color)
+        private void CloneForBigSquare(Enums.ConnectionType targetPos, Enums.BlockColorType color)
         {
             var obj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
             var c = obj.GetComponent<ChildBlockSystem>();
-            c.Initialize(pos, source.transform.localPosition, source.transform.localScale);
-            c.SetBlockColor(color);
 
             var shape = DataManager.Instance.blockShapeScaleAndLocalPosList
-                .Find(x => x.blockPositionType == GetBlockPositionType(pos));
+                .Find(x => x.blockPositionType == GetBlockPositionType(targetPos));
             if (shape != null)
             {
-                var finalPos = new Vector3(shape.localPos.x, shape.localPos.y, 0f);
-                var finalScale = new Vector3(shape.localScale.x, shape.localScale.y, 1f);
-                var conn = DataManager.Instance.GetConnectionData(pos);
-                if (conn != null)
+                var conn = DataManager.Instance.GetConnectionData(targetPos);
+                if (conn == null)
                 {
-                    finalPos += new Vector3(conn.positionOffset.x, conn.positionOffset.y, 0f);
-                    finalScale = new Vector3(conn.scaleAdjustment.x, conn.scaleAdjustment.y, 0.975f);
+                    Debug.LogError("Connection data is null for big square pos: " + targetPos);
+                    return;
                 }
+
+                var initialPos = new Vector3(shape.localPos.x, shape.localPos.y, 0f);
+                var initialScale = new Vector3(shape.localScale.x, shape.localScale.y, 1f);
+                c.Initialize(targetPos, initialPos, initialScale);
+                c.SetBlockColor(color);
+
+                var finalPos = initialPos + new Vector3(conn.positionOffset.x, conn.positionOffset.y, 0f);
+                var finalScale = new Vector3(conn.scaleAdjustment.x, conn.scaleAdjustment.y, 0.975f);
+
                 obj.transform.DOLocalMove(finalPos, 0.3f).SetEase(Ease.OutBack);
                 obj.transform.DOScale(finalScale, 0.3f).SetEase(Ease.OutBack);
             }
+            else
+            {
+                Debug.LogError("Could not find target position data for " + targetPos);
+                return;
+            }
+
             c.isBigSquare = true;
-            _childBlockMap[pos] = c;
+            _childBlockMap[targetPos] = c;
         }
 
         private List<ChildBlockSystem> GetExactNeighborBlocks(ChildBlockSystem b)
@@ -298,26 +379,31 @@ namespace _TheGame._Scripts.Block
             var list = new List<ChildBlockSystem>();
             var x = positionData.x;
             var y = positionData.y;
+            
             if (b.position == Enums.ConnectionType.TopLeft)
             {
                 if (x - 1 >= 0) list.Add(GetChildBlockAt(x - 1, y, Enums.ConnectionType.TopRight));
                 if (y - 1 >= 0) list.Add(GetChildBlockAt(x, y - 1, Enums.ConnectionType.BottomLeft));
             }
+
             if (b.position == Enums.ConnectionType.TopRight)
             {
                 if (x + 1 < BoardSize) list.Add(GetChildBlockAt(x + 1, y, Enums.ConnectionType.TopLeft));
                 if (y - 1 >= 0) list.Add(GetChildBlockAt(x, y - 1, Enums.ConnectionType.BottomRight));
             }
+
             if (b.position == Enums.ConnectionType.BottomLeft)
             {
                 if (x - 1 >= 0) list.Add(GetChildBlockAt(x - 1, y, Enums.ConnectionType.BottomRight));
                 if (y + 1 < BoardSize) list.Add(GetChildBlockAt(x, y + 1, Enums.ConnectionType.TopLeft));
             }
+
             if (b.position == Enums.ConnectionType.BottomRight)
             {
                 if (x + 1 < BoardSize) list.Add(GetChildBlockAt(x + 1, y, Enums.ConnectionType.BottomLeft));
                 if (y + 1 < BoardSize) list.Add(GetChildBlockAt(x, y + 1, Enums.ConnectionType.TopRight));
             }
+
             return list;
         }
 

@@ -22,7 +22,6 @@ namespace _TheGame._Scripts.Block
 
         private void Update()
         {
-            // Hareket durunca reset
             if (Time.time - _lastMovementTime > resetDelay && transform.rotation != Quaternion.identity)
             {
                 ResetRotation();

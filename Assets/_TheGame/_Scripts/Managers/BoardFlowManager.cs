@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using _TheGame._Scripts.Block;
-using _TheGame._Scripts.Board;
 using _TheGame._Scripts.Data;
 using _TheGame._Scripts.References;
 using DG.Tweening;
@@ -11,15 +10,8 @@ using UnityEngine;
 
 namespace _TheGame._Scripts.Managers
 {
-    public class BoardFlowManager : MonoBehaviour
+    public class BoardFlowManager : Singleton<BoardFlowManager>
     {
-        public static BoardFlowManager Instance;
-
-        private void Awake()
-        {
-            Instance = this;
-        }
-
         public void StartFullFlowWithCallback(Action onComplete)
         {
             StartCoroutine(FullFlowRoutine(onComplete));
@@ -41,17 +33,16 @@ namespace _TheGame._Scripts.Managers
                 if (allBlocksToDestroy.Count == 0) break;
 
                 yield return StartCoroutine(DestroyAllAtOnce(allBlocksToDestroy));
-        
-                var grid = FindObjectOfType<BoardGrid>();
-                if (grid != null)
+
+                if (ComponentReferences.Instance.boardGrid != null)
                 {
-                    grid.ClearAllPositions();
+                    ComponentReferences.Instance.boardGrid.ClearAllPositions();
                     allBlockSystems = FindObjectsOfType<BlockSystem>().ToList();
                     foreach (var bs in allBlockSystems)
                     {
                         var pos = bs.positionData;
-                        grid.RegisterBlockSystem(pos.x, pos.y, bs);
-                        grid.SetPositionOccupied(pos.y, pos.x);
+                        ComponentReferences.Instance.boardGrid.RegisterBlockSystem(pos.x, pos.y, bs);
+                        ComponentReferences.Instance.boardGrid.SetPositionOccupied(pos.y, pos.x);
                     }
                 }
 
@@ -62,17 +53,26 @@ namespace _TheGame._Scripts.Managers
                     bs.CheckIfEmpty();
                 }
 
-                if (grid != null)
+                if (ComponentReferences.Instance.boardGrid != null)
                 {
-                    for (var c = 0; c < GameData.BoardSize; c++) 
+                    for (var c = 0; c < GameData.BoardSize; c++)
                     {
-                        grid.ApplyGravity(c);
+                        ComponentReferences.Instance.boardGrid.ApplyGravity(c);
                     }
                 }
 
                 yield return new WaitForSeconds(0.8f);
             }
-            onComplete?.Invoke();
+
+            if (ComponentReferences.Instance.boardGrid != null &&
+                !ComponentReferences.Instance.boardGrid.HasAnyOccupiedPosition())
+            {
+                UiManager.Instance.GameWin();
+            }
+            else
+            {
+                onComplete?.Invoke();
+            }
         }
 
         private IEnumerator DestroyAllAtOnce(HashSet<ChildBlockSystem> blocksToDestroy)
@@ -105,13 +105,15 @@ namespace _TheGame._Scripts.Managers
                 if (b == null) continue;
 
                 var color = DataManager.Instance.GetColorFromBlock(b.blockColor);
-                var partObj = Instantiate(PrefabReferences.Instance.blockDestroyParticle, b.transform.position, Quaternion.identity);
+                var partObj = Instantiate(PrefabReferences.Instance.blockDestroyParticle, b.transform.position,
+                    Quaternion.identity);
                 var systems = partObj.GetComponentsInChildren<ParticleSystem>();
                 foreach (var ps in systems)
                 {
                     var main = ps.main;
                     main.startColor = color;
                 }
+
                 Destroy(partObj, 2f);
 
                 var parent = b.transform.parent.GetComponent<BlockSystem>();
@@ -133,6 +135,7 @@ namespace _TheGame._Scripts.Managers
                 sy += p.y;
                 count++;
             }
+
             if (count == 0) return Vector3.zero;
             return new Vector3(sx / count, sy / count, 0f);
         }

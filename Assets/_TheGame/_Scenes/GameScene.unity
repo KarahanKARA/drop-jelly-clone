@@ -661,7 +661,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardGrid: {fileID: 1889571127}
   createdBlockParent: {fileID: 836299579}
-  movesText: {fileID: 0}
+  movesText: {fileID: 1733302577}
 --- !u!1 &433793424
 GameObject:
   m_ObjectHideFlags: 0

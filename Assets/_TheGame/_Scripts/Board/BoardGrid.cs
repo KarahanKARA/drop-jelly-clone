@@ -185,6 +185,21 @@ namespace _TheGame._Scripts.Board
             }
         }
 
+        public bool HasAnyOccupiedPosition()
+        {
+            for (int row = 0; row < GameData.BoardSize; row++)
+            {
+                for (int col = 0; col < GameData.BoardSize; col++)
+                {
+                    if (_boardPositions[row, col].IsOccupied)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         private void OnDrawGizmos()
         {
             if (_boardPositions == null || !showGizmos) return;

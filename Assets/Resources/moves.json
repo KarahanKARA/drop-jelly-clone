@@ -1,102 +1,212 @@
 {
-  "blocks": [
+  "levels": [
     {
-      "id": 1,
-      "children": [
+      "levelId": 1,
+      "blocks": [
         {
-          "position": "TopLeft",
-          "color": "Green",
-          "connectedWith": "TopRight"
+          "id": 1,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Green",
+              "connectedWith": "TopRight"
+            },
+            {
+              "position": "TopRight",
+              "color": "Green",
+              "connectedWith": "TopLeft"
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Red",
+              "connectedWith": null
+            },
+            {
+              "position": "BottomRight",
+              "color": "Blue",
+              "connectedWith": null
+            }
+          ]
         },
         {
-          "position": "TopRight",
-          "color": "Green",
-          "connectedWith": "TopLeft"
+          "id": 2,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Red",
+              "connectedWith": "TopRight"
+            },
+            {
+              "position": "TopRight",
+              "color": "Red",
+              "connectedWith": "TopLeft"
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Orange",
+              "connectedWith": "BottomRight"
+            },
+            {
+              "position": "BottomRight",
+              "color": "Orange",
+              "connectedWith": "BottomLeft"
+            }
+          ]
         },
         {
-          "position": "BottomLeft",
-          "color": "Red",
-          "connectedWith": null
+          "id": 3,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Green",
+              "connectedWith": null
+            },
+            {
+              "position": "TopRight",
+              "color": "Yellow",
+              "connectedWith": null
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Red",
+              "connectedWith": null
+            },
+            {
+              "position": "BottomRight",
+              "color": "Purple",
+              "connectedWith": null
+            }
+          ]
         },
         {
-          "position": "BottomRight",
-          "color": "Blue",
-          "connectedWith": null
+          "id": 4,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Red",
+              "connectedWith": "TopRight"
+            },
+            {
+              "position": "TopRight",
+              "color": "Red",
+              "connectedWith": "TopLeft"
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Red",
+              "connectedWith": "BottomRight"
+            },
+            {
+              "position": "BottomRight",
+              "color": "Red",
+              "connectedWith": "BottomLeft"
+            }
+          ]
         }
       ]
     },
     {
-      "id": 2,
-      "children": [
+      "levelId": 2,
+      "blocks": [
         {
-          "position": "TopLeft",
-          "color": "Red",
-          "connectedWith": "TopRight"
+          "id": 1,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Green",
+              "connectedWith": "TopRight"
+            },
+            {
+              "position": "TopRight",
+              "color": "Green",
+              "connectedWith": "TopLeft"
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Red",
+              "connectedWith": null
+            },
+            {
+              "position": "BottomRight",
+              "color": "Blue",
+              "connectedWith": null
+            }
+          ]
         },
         {
-          "position": "TopRight",
-          "color": "Red",
-          "connectedWith": "TopLeft"
+          "id": 2,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Red",
+              "connectedWith": "TopRight"
+            },
+            {
+              "position": "TopRight",
+              "color": "Red",
+              "connectedWith": "TopLeft"
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Orange",
+              "connectedWith": "BottomRight"
+            },
+            {
+              "position": "BottomRight",
+              "color": "Orange",
+              "connectedWith": "BottomLeft"
+            }
+          ]
         },
         {
-          "position": "BottomLeft",
-          "color": "Orange",
-          "connectedWith": "BottomRight"
+          "id": 3,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Green",
+              "connectedWith": null
+            },
+            {
+              "position": "TopRight",
+              "color": "Yellow",
+              "connectedWith": null
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Red",
+              "connectedWith": null
+            },
+            {
+              "position": "BottomRight",
+              "color": "Purple",
+              "connectedWith": null
+            }
+          ]
         },
         {
-          "position": "BottomRight",
-          "color": "Orange",
-          "connectedWith": "BottomLeft"
-        }
-      ]
-    },
-    {
-      "id": 3,
-      "children": [
-        {
-          "position": "TopLeft",
-          "color": "Green",
-          "connectedWith": null
-        },
-        {
-          "position": "TopRight",
-          "color": "Yellow",
-          "connectedWith": null
-        },
-        {
-          "position": "BottomLeft",
-          "color": "Red",
-          "connectedWith": null
-        },
-        {
-          "position": "BottomRight",
-          "color": "Purple",
-          "connectedWith": null
-        }
-      ]
-    },
-    {
-      "id": 4,
-      "children": [
-        {
-          "position": "TopLeft",
-          "color": "Red",
-          "connectedWith": "TopRight"
-        },
-        {
-          "position": "TopRight",
-          "color": "Red",
-          "connectedWith": "TopLeft"
-        },
-        {
-          "position": "BottomLeft",
-          "color": "Red",
-          "connectedWith": "BottomRight"
-        },
-        {
-          "position": "BottomRight",
-          "color": "Red",
-          "connectedWith": "BottomLeft"
+          "id": 4,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Red",
+              "connectedWith": "TopRight"
+            },
+            {
+              "position": "TopRight",
+              "color": "Red",
+              "connectedWith": "TopLeft"
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Red",
+              "connectedWith": "BottomRight"
+            },
+            {
+              "position": "BottomRight",
+              "color": "Red",
+              "connectedWith": "BottomLeft"
+            }
+          ]
         }
       ]
     }

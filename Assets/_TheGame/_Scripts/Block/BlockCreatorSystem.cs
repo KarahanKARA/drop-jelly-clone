@@ -16,7 +16,18 @@ namespace _TheGame._Scripts.Block
 
         private void Start()
         {
-            _moveData = JsonHelper.LoadMoveData();
+            var levelId = SaveManager.Instance.GetLastLevelIndex();
+            _moveData = JsonHelper.LoadMoveData(levelId);
+    
+            if (_moveData != null && _moveData.blocks != null)
+            {
+                var uiManager = FindObjectOfType<UiManager>();
+                if (uiManager != null)
+                {
+                    UiManager.Instance.SetMovesText(_moveData.blocks.Length);
+                }
+            }
+
             CreateNewBlock();
         }
 
@@ -24,7 +35,11 @@ namespace _TheGame._Scripts.Block
         {
             if (_moveData == null || _currentBlockIndex >= _moveData.blocks.Length)
             {
-                Debug.LogWarning("No more blocks in move data!");
+                var grid = ComponentReferences.Instance.boardGrid;
+                if (grid != null && grid.HasAnyOccupiedPosition())
+                {
+                    UiManager.Instance.GameFail();
+                }
                 return;
             }
 
@@ -101,6 +116,13 @@ namespace _TheGame._Scripts.Block
             {
                 _currentActiveBlock.OnBlockPlaced -= HandleBlockPlaced;
             }
+
+            var uiManager = FindObjectOfType<UiManager>();
+            if (uiManager != null)
+            {
+                uiManager.SetMovesText(_moveData.blocks.Length - _currentBlockIndex);
+            }
+
             BoardFlowManager.Instance.StartFullFlowWithCallback(CreateNewBlock);
         }
     }

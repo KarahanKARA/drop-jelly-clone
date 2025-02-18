@@ -22,6 +22,11 @@ namespace _TheGame._Scripts.Managers
             ComponentReferences.Instance.movesText.text = "Moves : " + moveCount;
         }
 
+        public void SetLevelText(string levelCount)
+        {
+            ComponentReferences.Instance.levelText.text = "Level : " + levelCount;
+        }
+
         public void GameFail()
         {
             StartCoroutine(DelayFailFunc());
@@ -29,6 +34,7 @@ namespace _TheGame._Scripts.Managers
         
         public void GameWin()
         {
+            ObjectReferences.Instance.congratsPanel.SetActive(true);
             StartCoroutine(DelayFunc());
         }
 

@@ -9,5 +9,6 @@ namespace _TheGame._Scripts.References
         public BoardGrid boardGrid;
         public Transform createdBlockParent;
         public TextMeshProUGUI movesText;
+        public TextMeshProUGUI levelText;
     }
 }

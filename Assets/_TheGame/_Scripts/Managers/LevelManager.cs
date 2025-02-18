@@ -75,6 +75,7 @@ namespace _TheGame._Scripts.Managers
                 Debug.LogError("Level with id " + levelIndex + " not found in levels.json!");
                 yield break;
             }
+            UiManager.Instance.SetLevelText(levelIndex.ToString());
 
             foreach (var blockData in currentLevel.moveData.blocks)
             {

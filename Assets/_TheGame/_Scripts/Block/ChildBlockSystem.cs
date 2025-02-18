@@ -19,7 +19,6 @@ namespace _TheGame._Scripts.Block
 
         private MeshRenderer _meshRenderer;
         private Vector3 _originalPosition;
-        private Vector3 _originalScale;
 
         public bool isBigSquare = false;
 
@@ -42,7 +41,6 @@ namespace _TheGame._Scripts.Block
         private void SetInitialTransform(Vector3 initialPos, Vector3 initialScale)
         {
             _originalPosition = initialPos;
-            _originalScale = initialScale;
             transform.localPosition = initialPos;
             transform.localScale = initialScale;
         }
@@ -63,13 +61,6 @@ namespace _TheGame._Scripts.Block
             ApplyConnectionTransform();
         }
 
-        public void RemoveConnection()
-        {
-            isConnected = false;
-            connectedWith = Enums.ConnectionType.None;
-            ResetTransform();
-        }
-
         private void ApplyConnectionTransform()
         {
             var connectionData = DataManager.Instance.GetConnectionData(position);
@@ -86,12 +77,6 @@ namespace _TheGame._Scripts.Block
                 newPosition.y += connectionData.positionOffset.y;
                 transform.localPosition = newPosition;
             }
-        }
-
-        private void ResetTransform()
-        {
-            transform.localPosition = _originalPosition;
-            transform.localScale = _originalScale;
         }
     }
 }

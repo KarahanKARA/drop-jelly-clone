@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using _TheGame._Scripts.Block;
 using _TheGame._Scripts.Board;
+using _TheGame._Scripts.Data;
 using DG.Tweening;
 using UnityEngine;
 
@@ -51,7 +52,7 @@ namespace _TheGame._Scripts.Managers
                 var grid = FindObjectOfType<BoardGrid>();
                 if (grid != null)
                 {
-                    for (var c = 0; c < 6; c++) grid.ApplyGravity(c);
+                    for (var c = 0; c < GameData.BoardSize; c++) grid.ApplyGravity(c);
                 }
 
                 yield return new WaitForSeconds(0.5f);

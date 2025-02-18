@@ -1,4 +1,3 @@
-using System;
 using _TheGame._Scripts.Block;
 using _TheGame._Scripts.Data;
 using DG.Tweening;
@@ -112,64 +111,53 @@ namespace _TheGame._Scripts.Board
                 _boardPositions[row, col] = new GridPosition(currentPos.X, currentPos.Y, false);
             }
         }
-
-        public bool IsPositionOccupied(int row, int col)
-        {
-            return IsValidPosition(row, col) && _boardPositions[row, col].IsOccupied;
-        }
-        
         public void ApplyGravity(int col)
         {
-            for (int row = GameData.BoardSize - 1; row >= 0; row--)
+            bool needsAnotherPass;
+            do
             {
-                if (blockSystemGrid[col, row] == null)
+                needsAnotherPass = false;
+                for (var row = GameData.BoardSize - 1; row >= 0; row--)
                 {
-                    for (int rowAbove = row - 1; rowAbove >= 0; rowAbove--)
+                    if (blockSystemGrid[col, row] == null)
                     {
-                        if (blockSystemGrid[col, rowAbove] != null)
+                        for (var rowAbove = row - 1; rowAbove >= 0; rowAbove--)
                         {
-                            MoveBlockSystemDown(col, rowAbove, row);
-                            break; 
+                            if (blockSystemGrid[col, rowAbove] != null)
+                            {
+                                MoveBlockSystemDown(col, rowAbove, row);
+                                needsAnotherPass = true; // Bir hareket yaptıysak tekrar kontrol etmeliyiz
+                                break;
+                            }
                         }
                     }
                 }
-            }
+            } while (needsAnotherPass); // Hiç hareket kalmayıncaya kadar devam et
         }
 
         private void MoveBlockSystemDown(int col, int rowAbove, int rowTarget)
         {
             var blockSys = blockSystemGrid[col, rowAbove];
+    
+            // Önce grid'i güncelle
             blockSystemGrid[col, rowAbove] = null;
             blockSystemGrid[col, rowTarget] = blockSys;
 
+            // Pozisyonları güncelle
             SetPositionEmpty(rowAbove, col);
             SetPositionOccupied(rowTarget, col);
-
+    
             blockSys.positionData = new Vector2Int(col, rowTarget);
 
-            var targetPos = new Vector3(_boardPositions[rowTarget, col].X,
+            // Animasyonu başlat
+            var targetPos = new Vector3(
+                _boardPositions[rowTarget, col].X,
                 _boardPositions[rowTarget, col].Y,
-                blockSys.transform.position.z);
+                blockSys.transform.position.z
+            );
 
-            blockSys.transform.DOMove(targetPos, 0.3f).SetEase(Ease.OutBounce);
-
-        }
-
-
-        public Vector2[] GetColumnPositions(int col)
-        {
-            if (col is < 0 or >= GameData.BoardSize)
-            {
-                Debug.LogError($"Invalid column: {col}");
-                return Array.Empty<Vector2>();
-            }
-
-            var positions = new Vector2[GameData.BoardSize];
-            for (var row = 0; row < GameData.BoardSize; row++)
-            {
-                positions[row] = new Vector2(_boardPositions[row, col].X, _boardPositions[row, col].Y);
-            }
-            return positions;
+            blockSys.transform.DOMove(targetPos, 0.3f)
+                .SetEase(Ease.OutBounce);
         }
 
         private bool IsValidPosition(int column, int row)

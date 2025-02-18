@@ -395,6 +395,285 @@
         { "id": 7, "col": 2, "row": 3 },
         { "id": 8, "col": 2, "row": 2 }
       ]
+    },
+    {
+      "id": 3,
+      "moveData": {
+        "blocks": [
+          {
+            "id": 1,
+            "isSquare": false,
+            "children": [
+              {
+                "position": "TopLeft",
+                "color": "Blue",
+                "connectedWith": "TopRight"
+              },
+              {
+                "position": "TopRight",
+                "color": "Blue",
+                "connectedWith": "TopLeft"
+              },
+              {
+                "position": "BottomLeft",
+                "color": "Pink",
+                "connectedWith": null
+              },
+              {
+                "position": "BottomRight",
+                "color": "Orange",
+                "connectedWith": null
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "isSquare": true,
+            "children": [
+              {
+                "position": "TopLeft",
+                "color": "Yellow",
+                "connectedWith": "BottomLeft"
+              },
+              {
+                "position": "TopRight",
+                "color": "Yellow",
+                "connectedWith": "BottomRight"
+              },
+              {
+                "position": "BottomLeft",
+                "color": "Yellow",
+                "connectedWith": "TopLeft"
+              },
+              {
+                "position": "BottomRight",
+                "color": "Yellow",
+                "connectedWith": "TopRight"
+              }
+            ]
+          },
+          {
+            "id": 3,
+            "isSquare": false,
+            "children": [
+              {
+                "position": "TopLeft",
+                "color": "Blue",
+                "connectedWith": "BottomLeft"
+              },
+              {
+                "position": "TopRight",
+                "color": "Pink",
+                "connectedWith": "BottomRight"
+              },
+              {
+                "position": "BottomLeft",
+                "color": "Blue",
+                "connectedWith": "TopLeft"
+              },
+              {
+                "position": "BottomRight",
+                "color": "Pink",
+                "connectedWith": "TopRight"
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "isSquare": false,
+            "children": [
+              {
+                "position": "TopLeft",
+                "color": "DarkBlue",
+                "connectedWith": "BottomLeft"
+              },
+              {
+                "position": "TopRight",
+                "color": "Yellow",
+                "connectedWith": "BottomRight"
+              },
+              {
+                "position": "BottomLeft",
+                "color": "DarkBlue",
+                "connectedWith": "TopLeft"
+              },
+              {
+                "position": "BottomRight",
+                "color": "Yellow",
+                "connectedWith": "TopRight"
+              }
+            ]
+          },
+          {
+            "id": 5,
+            "isSquare": true,
+            "children": [
+              {
+                "position": "TopLeft",
+                "color": "Red",
+                "connectedWith": "TopRight"
+              },
+              {
+                "position": "TopRight",
+                "color": "Red",
+                "connectedWith": "TopLeft"
+              },
+              {
+                "position": "BottomLeft",
+                "color": "Red",
+                "connectedWith": "BottomRight"
+              },
+              {
+                "position": "BottomRight",
+                "color": "Red",
+                "connectedWith": "BottomLeft"
+              }
+            ]
+          },
+          {
+            "id": 6,
+            "isSquare": false,
+            "children": [
+              {
+                "position": "TopLeft",
+                "color": "Red",
+                "connectedWith": "TopRight"
+              },
+              {
+                "position": "TopRight",
+                "color": "Red",
+                "connectedWith": "TopLeft"
+              },
+              {
+                "position": "BottomLeft",
+                "color": "Yellow",
+                "connectedWith": "BottomRight"
+              },
+              {
+                "position": "BottomRight",
+                "color": "Yellow",
+                "connectedWith": "BottomLeft"
+              }
+            ]
+          },
+          {
+            "id": 7,
+            "isSquare": false,
+            "children": [
+              {
+                "position": "TopLeft",
+                "color": "DarkBlue",
+                "connectedWith": "BottomLeft"
+              },
+              {
+                "position": "TopRight",
+                "color": "Pink",
+                "connectedWith": "BottomRight"
+              },
+              {
+                "position": "BottomLeft",
+                "color": "DarkBlue",
+                "connectedWith": "TopLeft"
+              },
+              {
+                "position": "BottomRight",
+                "color": "Pink",
+                "connectedWith": "TopRight"
+              }
+            ]
+          },
+          {
+            "id": 8,
+            "isSquare": false,
+            "children": [
+              {
+                "position": "TopLeft",
+                "color": "Yellow",
+                "connectedWith": "BottomLeft"
+              },
+              {
+                "position": "TopRight",
+                "color": "Red",
+                "connectedWith": "BottomRight"
+              },
+              {
+                "position": "BottomLeft",
+                "color": "Yellow",
+                "connectedWith": "TopLeft"
+              },
+              {
+                "position": "BottomRight",
+                "color": "Red",
+                "connectedWith": "TopRight"
+              }
+            ]
+          },
+          {
+            "id": 9,
+            "isSquare": false,
+            "children": [
+              {
+                "position": "TopLeft",
+                "color": "Yellow",
+                "connectedWith": null
+              },
+              {
+                "position": "TopRight",
+                "color": "Pink",
+                "connectedWith": "BottomRight"
+              },
+              {
+                "position": "BottomLeft",
+                "color": "Red",
+                "connectedWith": null
+              },
+              {
+                "position": "BottomRight",
+                "color": "Pink",
+                "connectedWith": "TopRight"
+              }
+            ]
+          },
+          {
+            "id": 10,
+            "isSquare": false,
+            "children": [
+              {
+                "position": "TopLeft",
+                "color": "Pink",
+                "connectedWith": "BottomLeft"
+              },
+              {
+                "position": "TopRight",
+                "color": "DarkBlue",
+                "connectedWith": null
+              },
+              {
+                "position": "BottomLeft",
+                "color": "Pink",
+                "connectedWith": "TopLeft"
+              },
+              {
+                "position": "BottomRight",
+                "color": "Yellow",
+                "connectedWith": null
+              }
+            ]
+          }
+        ]
+      },
+      "blocksGridPositions": [
+        { "id": 1, "col": 2, "row": 5 },
+        { "id": 2, "col": 3, "row": 5 },
+        { "id": 3, "col": 3, "row": 4 },
+        { "id": 4, "col": 4, "row": 5 },
+        { "id": 5, "col": 4, "row": 4 },
+        { "id": 6, "col": 4, "row": 3 },
+        { "id": 7, "col": 5, "row": 5 },
+        { "id": 8, "col": 5, "row": 4 },
+        { "id": 9, "col": 5, "row": 3 },
+        { "id": 10, "col": 5, "row": 2 }
+      ]
     }
   ]
 }

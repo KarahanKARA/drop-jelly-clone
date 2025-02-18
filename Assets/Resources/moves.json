@@ -234,6 +234,161 @@
           ]
         }
       ]
+    },
+    {
+      "levelId": 3,
+      "blocks": [
+        {
+          "id": 1,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Yellow",
+              "connectedWith": null
+            },
+            {
+              "position": "TopRight",
+              "color": "DarkBlue",
+              "connectedWith": null
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Red",
+              "connectedWith": null
+            },
+            {
+              "position": "BottomRight",
+              "color": "Pink",
+              "connectedWith": null
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Orange",
+              "connectedWith": null
+            },
+            {
+              "position": "TopRight",
+              "color": "Pink",
+              "connectedWith": null
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Blue",
+              "connectedWith": "BottomRight"
+            },
+            {
+              "position": "BottomRight",
+              "color": "Blue",
+              "connectedWith": "BottomLeft"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Pink",
+              "connectedWith": "TopRight"
+            },
+            {
+              "position": "TopRight",
+              "color": "Pink",
+              "connectedWith": "TopLeft"
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Yellow",
+              "connectedWith": null
+            },
+            {
+              "position": "BottomRight",
+              "color": "DarkBlue",
+              "connectedWith": null
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "DarkBlue",
+              "connectedWith": "BottomLeft"
+            },
+            {
+              "position": "TopRight",
+              "color": "Yellow",
+              "connectedWith": null
+            },
+            {
+              "position": "BottomLeft",
+              "color": "DarkBlue",
+              "connectedWith": "TopLeft"
+            },
+            {
+              "position": "BottomRight",
+              "color": "Red",
+              "connectedWith": null
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Red",
+              "connectedWith": "TopRight"
+            },
+            {
+              "position": "TopRight",
+              "color": "Red",
+              "connectedWith": "TopLeft"
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Pink",
+              "connectedWith": "BottomRight"
+            },
+            {
+              "position": "BottomRight",
+              "color": "Pink",
+              "connectedWith": "BottomLeft"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Pink",
+              "connectedWith": "BottomLeft"
+            },
+            {
+              "position": "TopRight",
+              "color": "Pink",
+              "connectedWith": "BottomRight"
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Pink",
+              "connectedWith": "TopLeft"
+            },
+            {
+              "position": "BottomRight",
+              "color": "Pink",
+              "connectedWith": "TopRight"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

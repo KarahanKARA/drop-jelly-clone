@@ -388,6 +388,7 @@ namespace _TheGame._Scripts.Block
         private void OnDestroy()
         {
             if (_boardGrid != null) _boardGrid.UnregisterBlockSystem(positionData.x, positionData.y);
+            DOTween.Kill(transform);
         }
     }
 }

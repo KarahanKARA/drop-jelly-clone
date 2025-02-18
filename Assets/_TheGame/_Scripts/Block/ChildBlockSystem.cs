@@ -1,5 +1,6 @@
 using _TheGame._Scripts.Helpers;
 using _TheGame._Scripts.Managers;
+using DG.Tweening;
 using UnityEngine;
 
 namespace _TheGame._Scripts.Block
@@ -77,6 +78,11 @@ namespace _TheGame._Scripts.Block
                 newPosition.y += connectionData.positionOffset.y;
                 transform.localPosition = newPosition;
             }
+        }
+        
+        private void OnDestroy()
+        {
+            DOTween.Kill(transform);
         }
     }
 }

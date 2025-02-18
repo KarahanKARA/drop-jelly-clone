@@ -35,11 +35,6 @@ namespace _TheGame._Scripts.Board
 
         private void InitializeBoardPositions()
         {
-            if(GameData.BoardSize <= 0)
-            {
-                Debug.LogError("GameData.BoardSize must be greater than 0!");
-                return;
-            }
             _boardPositions = new GridPosition[GameData.BoardSize, GameData.BoardSize];
             for (int row = 0; row < GameData.BoardSize; row++)
             {

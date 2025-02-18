@@ -1044,6 +1044,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &863188983
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 863188984}
+  - component: {fileID: 863188985}
+  m_Layer: 0
+  m_Name: LevelManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &863188984
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 863188983}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2038569970}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &863188985
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 863188983}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c504a4a9238584c259a8c0a92153c465, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &965314716
 GameObject:
   m_ObjectHideFlags: 0
@@ -2039,6 +2083,50 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1548508408}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1601166164
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1601166165}
+  - component: {fileID: 1601166166}
+  m_Layer: 0
+  m_Name: SaveManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1601166165
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1601166164}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2038569970}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1601166166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1601166164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d414387230f480aa548ebfeb259a648, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1800467442
 GameObject:
   m_ObjectHideFlags: 0
@@ -2330,6 +2418,8 @@ Transform:
   - {fileID: 2042881466}
   - {fileID: 2048200431}
   - {fileID: 1471772908}
+  - {fileID: 863188984}
+  - {fileID: 1601166165}
   m_Father: {fileID: 150640289}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2042881465
@@ -2376,23 +2466,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eeff501413db3490ebcb99bb0dd2cb78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blockColorList:
-  - blockColorType: 1
-    blockColorMaterial: {fileID: 2100000, guid: c466029d4bed040b6ba6d50e4a14a2bc, type: 2}
-  - blockColorType: 2
-    blockColorMaterial: {fileID: 2100000, guid: cf2a93e5f97de4303837c6d5f351bb6b, type: 2}
-  - blockColorType: 3
-    blockColorMaterial: {fileID: 2100000, guid: 6233ef5a87aa44d6d809b6fde91bf879, type: 2}
-  - blockColorType: 4
-    blockColorMaterial: {fileID: 2100000, guid: dd1b3615d772d422db1a247630f3c1db, type: 2}
-  - blockColorType: 5
-    blockColorMaterial: {fileID: 2100000, guid: f48ec65ae8411473b92129f2a4fa6fa9, type: 2}
-  - blockColorType: 6
-    blockColorMaterial: {fileID: 2100000, guid: 696eb7a85ae3d4c20a3e111a9d115cd1, type: 2}
-  - blockColorType: 7
-    blockColorMaterial: {fileID: 2100000, guid: d62c5a4dfaeef4e548bad5ac02f54c50, type: 2}
-  - blockColorType: 8
-    blockColorMaterial: {fileID: 2100000, guid: 9bdaf6e4e3cfd4b929a3a14297dc8c42, type: 2}
+  currentMoveData:
+    blocks: []
   blockShapeScaleAndLocalPosList:
   - blockPositionType: 1
     localPos: {x: -0.5, y: 0.5}

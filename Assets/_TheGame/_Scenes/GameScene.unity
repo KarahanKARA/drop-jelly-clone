@@ -920,6 +920,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockPrefab: {fileID: 466212889023763029, guid: 47aae02890cd349ca9c08559d2270e34, type: 3}
   block1X1Prefab: {fileID: 4915511712926800424, guid: 558006d6e213a48b28a07a4d00a7810e, type: 3}
+  blockDestroyParticle: {fileID: 183846, guid: eb8eb977f3a1f0341ac06e638d078a1c, type: 3}
 --- !u!1 &836299578
 GameObject:
   m_ObjectHideFlags: 0
@@ -2147,7 +2148,7 @@ Transform:
   m_GameObject: {fileID: 1889571125}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.68}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

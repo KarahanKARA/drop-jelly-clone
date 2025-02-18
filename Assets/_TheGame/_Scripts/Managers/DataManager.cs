@@ -46,5 +46,11 @@ namespace _TheGame._Scripts.Managers
         {
             return blockColorList.Find(x => x.blockColorType == colorType).blockColorMaterial;
         }
+        
+        public Color GetColorFromBlock(Enums.BlockColorType blockColor)
+        {
+            var material = GetMaterialByColor(blockColor);
+            return material.color;
+        }
     }
 }

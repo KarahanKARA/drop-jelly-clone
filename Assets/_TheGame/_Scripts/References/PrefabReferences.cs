@@ -6,5 +6,6 @@ namespace _TheGame._Scripts.References
     {
         public GameObject blockPrefab;
         public GameObject block1X1Prefab;
+        public GameObject blockDestroyParticle;
     }
 }

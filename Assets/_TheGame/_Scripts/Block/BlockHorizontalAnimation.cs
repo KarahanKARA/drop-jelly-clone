@@ -30,16 +30,16 @@ namespace _TheGame._Scripts.Block
 
         public void UpdateHorizontalAnimation(float xPosition)
         {
-            float direction = xPosition - _lastXPosition;
+            var direction = xPosition - _lastXPosition;
             _lastXPosition = xPosition;
 
             if (Mathf.Abs(direction) > 0.01f)
             {
                 _lastMovementTime = Time.time; 
             
-                float targetRotation = direction < 0 ? maxRotationAngle : -maxRotationAngle;
+                var targetRotation = direction < 0 ? maxRotationAngle : -maxRotationAngle;
             
-                float currentYRotation = transform.rotation.eulerAngles.y;
+                var currentYRotation = transform.rotation.eulerAngles.y;
                 if (currentYRotation > 180) currentYRotation -= 360;
             
                 if (targetRotation > 0 && currentYRotation >= maxRotationAngle) return;

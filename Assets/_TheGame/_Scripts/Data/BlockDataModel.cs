@@ -1,10 +1,8 @@
 using System;
-using _TheGame._Scripts.Helpers;
-using UnityEngine;
 
 namespace _TheGame._Scripts.Data
 {
-    public class BlockDataModel
+    public abstract class BlockDataModel
     {
         [Serializable]
         public class GameMoveData
@@ -25,11 +23,6 @@ namespace _TheGame._Scripts.Data
             public string position;
             public string color;
             public string connectedWith;
-            public Enums.BlockColorType blockColorType;
-            public bool isConnected;
-            public Enums.ConnectionType connectionType;
-            public Vector2 originalPosition;
-            public Vector2 originalScale;
         }
     }
 }

@@ -111,53 +111,58 @@ namespace _TheGame._Scripts.Board
                 _boardPositions[row, col] = new GridPosition(currentPos.X, currentPos.Y, false);
             }
         }
+        public void ClearAllPositions()
+        {
+            for (int row = 0; row < GameData.BoardSize; row++)
+            {
+                for (int col = 0; col < GameData.BoardSize; col++)
+                {
+                    blockSystemGrid[col, row] = null;
+                    SetPositionEmpty(row, col);
+                }
+            }
+        }
+        
         public void ApplyGravity(int col)
         {
-            bool needsAnotherPass;
-            do
+            for (var row = GameData.BoardSize - 1; row >= 0; row--)
             {
-                needsAnotherPass = false;
-                for (var row = GameData.BoardSize - 1; row >= 0; row--)
+                if (blockSystemGrid[col, row] == null)
                 {
-                    if (blockSystemGrid[col, row] == null)
+                    BlockSystem blockToMove = null;
+                    var sourceRow = -1;
+            
+                    for (var rowAbove = row - 1; rowAbove >= 0; rowAbove--)
                     {
-                        for (var rowAbove = row - 1; rowAbove >= 0; rowAbove--)
+                        if (blockSystemGrid[col, rowAbove] != null)
                         {
-                            if (blockSystemGrid[col, rowAbove] != null)
-                            {
-                                MoveBlockSystemDown(col, rowAbove, row);
-                                needsAnotherPass = true; // Bir hareket yaptıysak tekrar kontrol etmeliyiz
-                                break;
-                            }
+                            blockToMove = blockSystemGrid[col, rowAbove];
+                            sourceRow = rowAbove;
+                            break;
                         }
                     }
+
+                    if (blockToMove != null)
+                    {
+                        blockSystemGrid[col, sourceRow] = null;
+                        SetPositionEmpty(sourceRow, col);
+
+                        blockSystemGrid[col, row] = blockToMove;
+                        SetPositionOccupied(row, col);
+                
+                        blockToMove.positionData = new Vector2Int(col, row);
+
+                        var targetPos = new Vector3(
+                            _boardPositions[row, col].X,
+                            _boardPositions[row, col].Y,
+                            blockToMove.transform.position.z
+                        );
+
+                        blockToMove.transform.DOMove(targetPos, 0.3f)
+                            .SetEase(Ease.OutBounce);
+                    }
                 }
-            } while (needsAnotherPass); // Hiç hareket kalmayıncaya kadar devam et
-        }
-
-        private void MoveBlockSystemDown(int col, int rowAbove, int rowTarget)
-        {
-            var blockSys = blockSystemGrid[col, rowAbove];
-    
-            // Önce grid'i güncelle
-            blockSystemGrid[col, rowAbove] = null;
-            blockSystemGrid[col, rowTarget] = blockSys;
-
-            // Pozisyonları güncelle
-            SetPositionEmpty(rowAbove, col);
-            SetPositionOccupied(rowTarget, col);
-    
-            blockSys.positionData = new Vector2Int(col, rowTarget);
-
-            // Animasyonu başlat
-            var targetPos = new Vector3(
-                _boardPositions[rowTarget, col].X,
-                _boardPositions[rowTarget, col].Y,
-                blockSys.transform.position.z
-            );
-
-            blockSys.transform.DOMove(targetPos, 0.3f)
-                .SetEase(Ease.OutBounce);
+            }
         }
 
         private bool IsValidPosition(int column, int row)

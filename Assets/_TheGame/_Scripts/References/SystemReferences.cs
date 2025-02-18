@@ -8,6 +8,5 @@ namespace _TheGame._Scripts.References
     {
         public RgbColorSystem rgbColorSystem;
         public BlockCreatorSystem blockCreatorSystem;
-        public MatchSystem matchSystem;
     }
 }

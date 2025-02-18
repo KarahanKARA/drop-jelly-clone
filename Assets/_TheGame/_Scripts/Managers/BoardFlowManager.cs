@@ -40,8 +40,21 @@ namespace _TheGame._Scripts.Managers
                 if (allBlocksToDestroy.Count == 0) break;
 
                 yield return StartCoroutine(DestroyAllAtOnce(allBlocksToDestroy));
+        
+                var grid = FindObjectOfType<BoardGrid>();
+                if (grid != null)
+                {
+                    grid.ClearAllPositions();
+            
+                    allBlockSystems = FindObjectsOfType<BlockSystem>().ToList();
+                    foreach (var bs in allBlockSystems)
+                    {
+                        var pos = bs.positionData;
+                        grid.RegisterBlockSystem(pos.x, pos.y, bs);
+                        grid.SetPositionOccupied(pos.y, pos.x);
+                    }
+                }
 
-                allBlockSystems = FindObjectsOfType<BlockSystem>().ToList();
                 foreach (var bs in allBlockSystems)
                 {
                     bs.CheckExpand();
@@ -49,18 +62,21 @@ namespace _TheGame._Scripts.Managers
                     bs.CheckIfEmpty();
                 }
 
-                var grid = FindObjectOfType<BoardGrid>();
                 if (grid != null)
                 {
-                    for (var c = 0; c < GameData.BoardSize; c++) grid.ApplyGravity(c);
+                    for (var c = 0; c < GameData.BoardSize; c++) 
+                    {
+                        grid.ApplyGravity(c);
+                    }
+                    yield return new WaitForSeconds(0.3f);
                 }
 
-                yield return new WaitForSeconds(0.5f);
+                yield return new WaitForSeconds(0.2f);
             }
             onComplete?.Invoke();
         }
 
-        IEnumerator DestroyAllAtOnce(HashSet<ChildBlockSystem> blocksToDestroy)
+        private IEnumerator DestroyAllAtOnce(HashSet<ChildBlockSystem> blocksToDestroy)
         {
             var seq = DG.Tweening.DOTween.Sequence();
             foreach (var b in blocksToDestroy)

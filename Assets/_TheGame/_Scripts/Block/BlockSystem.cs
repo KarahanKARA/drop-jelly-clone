@@ -14,7 +14,7 @@ namespace _TheGame._Scripts.Block
     {
         private const int BoardSize = GameData.BoardSize;
 
-        public Dictionary<Enums.ConnectionType, ChildBlockSystem> _childBlockMap 
+        public Dictionary<Enums.ConnectionType, ChildBlockSystem> _childBlockMap
             = new Dictionary<Enums.ConnectionType, ChildBlockSystem>();
 
         public Vector2Int positionData = new Vector2Int();
@@ -26,7 +26,8 @@ namespace _TheGame._Scripts.Block
             positionData = new Vector2Int(-10, -10);
         }
 
-        public void CreateChildBlock(Enums.ConnectionType positionType, Enums.BlockColorType colorType, Enums.ConnectionType connectedWith)
+        public void CreateChildBlock(Enums.ConnectionType positionType, Enums.BlockColorType colorType,
+            Enums.ConnectionType connectedWith)
         {
             var obj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
             var c = obj.GetComponent<ChildBlockSystem>();
@@ -71,6 +72,7 @@ namespace _TheGame._Scripts.Block
                             matchingNeighbors.Add(n);
                         }
                     }
+
                     if (hasMatch)
                     {
                         foreach (var child in _childBlockMap.Values)
@@ -78,7 +80,7 @@ namespace _TheGame._Scripts.Block
                             if (child.blockColor == b.blockColor)
                                 set.Add(child);
                         }
-                        
+
                         for (var i = 0; i < matchingNeighbors.Count; i++)
                         {
                             var nb = matchingNeighbors[i].transform.parent.GetComponent<BlockSystem>();
@@ -92,6 +94,7 @@ namespace _TheGame._Scripts.Block
                             }
                         }
                     }
+
                     continue;
                 }
 
@@ -119,6 +122,7 @@ namespace _TheGame._Scripts.Block
                     }
                 }
             }
+
             return set;
         }
 
@@ -132,7 +136,7 @@ namespace _TheGame._Scripts.Block
             }
         }
 
-        ChildBlockSystem GetConnectedBlock(ChildBlockSystem block)
+        private ChildBlockSystem GetConnectedBlock(ChildBlockSystem block)
         {
             if (block == null || !block.IsConnected) return null;
             if (_childBlockMap.TryGetValue(block.ConnectedWith, out var connected)) return connected;
@@ -164,7 +168,6 @@ namespace _TheGame._Scripts.Block
                 TryExpandHorizontally(pos);
             }
 
-            // Son olarak, bu blockSystem hala hayattaysa griddeki konumunu yeniden işaretle
             if (_boardGrid != null && _childBlockMap.Count > 0)
             {
                 var col = positionData.x;
@@ -177,16 +180,20 @@ namespace _TheGame._Scripts.Block
             }
         }
 
-        bool TryExpandVertically(Enums.ConnectionType emptyPos)
+        private bool TryExpandVertically(Enums.ConnectionType emptyPos)
         {
             var list = _childBlockMap.Values.ToList();
             var source = list.FirstOrDefault(b =>
             {
                 if (b.IsConnected) return false;
-                if (b.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.BottomLeft) return true;
-                if (b.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.BottomRight) return true;
-                if (b.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.TopLeft) return true;
-                if (b.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.TopRight) return true;
+                if (b.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.BottomLeft)
+                    return true;
+                if (b.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.BottomRight)
+                    return true;
+                if (b.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.TopLeft)
+                    return true;
+                if (b.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.TopRight)
+                    return true;
                 return false;
             });
             if (source != null)
@@ -194,19 +201,24 @@ namespace _TheGame._Scripts.Block
                 CloneAndMove(source, emptyPos);
                 return true;
             }
+
             return false;
         }
 
-        void TryExpandHorizontally(Enums.ConnectionType emptyPos)
+        private void TryExpandHorizontally(Enums.ConnectionType emptyPos)
         {
             var list = _childBlockMap.Values.ToList();
             var source = list.FirstOrDefault(b =>
             {
                 if (b.IsConnected) return false;
-                if (b.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.TopRight) return true;
-                if (b.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.TopLeft) return true;
-                if (b.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.BottomRight) return true;
-                if (b.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.BottomLeft) return true;
+                if (b.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.TopRight)
+                    return true;
+                if (b.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.TopLeft)
+                    return true;
+                if (b.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.BottomRight)
+                    return true;
+                if (b.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.BottomLeft)
+                    return true;
                 return false;
             });
             if (source != null)
@@ -215,7 +227,7 @@ namespace _TheGame._Scripts.Block
             }
         }
 
-        void CloneAndMove(ChildBlockSystem source, Enums.ConnectionType targetPos)
+        private void CloneAndMove(ChildBlockSystem source, Enums.ConnectionType targetPos)
         {
             var obj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
             var c = obj.GetComponent<ChildBlockSystem>();
@@ -234,8 +246,10 @@ namespace _TheGame._Scripts.Block
                     return;
                 }
 
-                var finalPosSource = source.transform.localPosition + new Vector3(srcData.positionOffset.x, srcData.positionOffset.y, 0);
-                var finalPosClone = new Vector3(shape.localPos.x, shape.localPos.y, 0) + new Vector3(tgtData.positionOffset.x, tgtData.positionOffset.y, 0);
+                var finalPosSource = source.transform.localPosition +
+                                     new Vector3(srcData.positionOffset.x, srcData.positionOffset.y, 0);
+                var finalPosClone = new Vector3(shape.localPos.x, shape.localPos.y, 0) +
+                                    new Vector3(tgtData.positionOffset.x, tgtData.positionOffset.y, 0);
 
                 source.transform.DOLocalMove(finalPosSource, 0.3f).SetEase(Ease.OutBack);
                 obj.transform.DOLocalMove(finalPosClone, 0.3f).SetEase(Ease.OutBack);
@@ -267,6 +281,7 @@ namespace _TheGame._Scripts.Block
                     _boardGrid.UnregisterBlockSystem(col, row);
                     _boardGrid.SetPositionEmpty(row, col);
                 }
+
                 Destroy(gameObject);
                 if (_boardGrid != null) _boardGrid.ApplyGravity(col);
             }
@@ -308,7 +323,7 @@ namespace _TheGame._Scripts.Block
             }
         }
 
-        void CloneForBigSquare(Enums.ConnectionType targetPos, Enums.BlockColorType color)
+        private void CloneForBigSquare(Enums.ConnectionType targetPos, Enums.BlockColorType color)
         {
             var obj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
             var c = obj.GetComponent<ChildBlockSystem>();
@@ -340,11 +355,12 @@ namespace _TheGame._Scripts.Block
                 Debug.LogError("Could not find target position data for " + targetPos);
                 return;
             }
+
             c.isBigSquare = true;
             _childBlockMap[targetPos] = c;
         }
 
-        List<ChildBlockSystem> GetExactNeighborBlocks(ChildBlockSystem b)
+        private List<ChildBlockSystem> GetExactNeighborBlocks(ChildBlockSystem b)
         {
             var list = new List<ChildBlockSystem>();
             var x = positionData.x;
@@ -355,25 +371,29 @@ namespace _TheGame._Scripts.Block
                 if (x - 1 >= 0) list.Add(GetChildBlockAt(x - 1, y, Enums.ConnectionType.TopRight));
                 if (y - 1 >= 0) list.Add(GetChildBlockAt(x, y - 1, Enums.ConnectionType.BottomLeft));
             }
+
             if (b.position == Enums.ConnectionType.TopRight)
             {
                 if (x + 1 < BoardSize) list.Add(GetChildBlockAt(x + 1, y, Enums.ConnectionType.TopLeft));
                 if (y - 1 >= 0) list.Add(GetChildBlockAt(x, y - 1, Enums.ConnectionType.BottomRight));
             }
+
             if (b.position == Enums.ConnectionType.BottomLeft)
             {
                 if (x - 1 >= 0) list.Add(GetChildBlockAt(x - 1, y, Enums.ConnectionType.BottomRight));
                 if (y + 1 < BoardSize) list.Add(GetChildBlockAt(x, y + 1, Enums.ConnectionType.TopLeft));
             }
+
             if (b.position == Enums.ConnectionType.BottomRight)
             {
                 if (x + 1 < BoardSize) list.Add(GetChildBlockAt(x + 1, y, Enums.ConnectionType.BottomLeft));
                 if (y + 1 < BoardSize) list.Add(GetChildBlockAt(x, y + 1, Enums.ConnectionType.TopRight));
             }
+
             return list;
         }
 
-        ChildBlockSystem GetChildBlockAt(int cx, int cy, Enums.ConnectionType cp)
+        private ChildBlockSystem GetChildBlockAt(int cx, int cy, Enums.ConnectionType cp)
         {
             if (_boardGrid == null) return null;
             var nb = _boardGrid.GetBlockSystemAt(cx, cy);
@@ -382,7 +402,7 @@ namespace _TheGame._Scripts.Block
             return null;
         }
 
-        Enums.BlockPositionType GetBlockPositionType(Enums.ConnectionType ct)
+        private Enums.BlockPositionType GetBlockPositionType(Enums.ConnectionType ct)
         {
             if (ct == Enums.ConnectionType.TopLeft) return Enums.BlockPositionType.TopLeft;
             if (ct == Enums.ConnectionType.TopRight) return Enums.BlockPositionType.TopRight;
@@ -391,7 +411,7 @@ namespace _TheGame._Scripts.Block
             return Enums.BlockPositionType.None;
         }
 
-        void OnDestroy()
+        private void OnDestroy()
         {
             if (_boardGrid != null) _boardGrid.UnregisterBlockSystem(positionData.x, positionData.y);
         }

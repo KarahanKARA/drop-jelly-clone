@@ -49,12 +49,22 @@ namespace _TheGame._Scripts.Block
             {
                 var positionType = GetConnectionTypeFromString(childData.position);
                 var colorType = GetColorTypeFromString(childData.color);
-                var connectedWith = childData.connectedWith != null ? 
-                    GetConnectionTypeFromString(childData.connectedWith) : 
-                    Enums.ConnectionType.None;
+                var connectedWith = !string.IsNullOrEmpty(childData.connectedWith)
+                    ? GetConnectionTypeFromString(childData.connectedWith)
+                    : Enums.ConnectionType.None;
 
                 blockSystem.CreateChildBlock(positionType, colorType, connectedWith);
             }
+            
+            if (blockData.isSquare)
+            {
+                foreach (var childBlock in blockSystem._childBlockMap.Values)
+                {
+                    childBlock.isBigSquare = true;
+                }
+                blockSystem.transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+            }
+
         }
 
         private Enums.ConnectionType GetConnectionTypeFromString(string position)
@@ -79,6 +89,8 @@ namespace _TheGame._Scripts.Block
                 "Yellow" => Enums.BlockColorType.Yellow,
                 "Purple" => Enums.BlockColorType.Purple,
                 "Pink" => Enums.BlockColorType.Pink,
+                "Orange" => Enums.BlockColorType.Orange,
+                "DarkBlue" => Enums.BlockColorType.DarkBlue,
                 _ => Enums.BlockColorType.None
             };
         }

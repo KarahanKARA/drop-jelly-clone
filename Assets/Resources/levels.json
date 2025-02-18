@@ -6,6 +6,7 @@
         "blocks": [
           {
             "id": 1,
+            "isSquare": true,
             "children": [
               {
                 "position": "TopLeft",
@@ -19,43 +20,45 @@
               },
               {
                 "position": "BottomLeft",
-                "color": "Blue",
-                "connectedWith": null
+                "color": "Red",
+                "connectedWith": "BottomRight"
               },
               {
                 "position": "BottomRight",
-                "color": "Green",
-                "connectedWith": null
+                "color": "Red",
+                "connectedWith": "BottomLeft"
               }
             ]
           },
           {
             "id": 2,
+            "isSquare": true,
             "children": [
               {
                 "position": "TopLeft",
-                "color": "Purple",
-                "connectedWith": null
+                "color": "Orange",
+                "connectedWith": "BottomLeft"
               },
               {
                 "position": "TopRight",
-                "color": "Blue",
+                "color": "Orange",
                 "connectedWith": "BottomRight"
               },
               {
                 "position": "BottomLeft",
-                "color": "Red",
-                "connectedWith": null
+                "color": "Orange",
+                "connectedWith": "TopLeft"
               },
               {
                 "position": "BottomRight",
-                "color": "Blue",
+                "color": "Orange",
                 "connectedWith": "TopRight"
               }
             ]
           },
           {
             "id": 3,
+            "isSquare": false,
             "children": [
               {
                 "position": "TopLeft",
@@ -69,7 +72,7 @@
               },
               {
                 "position": "BottomLeft",
-                "color": "Yellow",
+                "color": "Purple",
                 "connectedWith": null
               },
               {
@@ -81,6 +84,7 @@
           },
           {
             "id": 4,
+            "isSquare": false,
             "children": [
               {
                 "position": "TopLeft",
@@ -94,7 +98,7 @@
               },
               {
                 "position": "BottomLeft",
-                "color": "Yellow",
+                "color": "Purple",
                 "connectedWith": null
               },
               {
@@ -106,51 +110,53 @@
           },
           {
             "id": 5,
+            "isSquare": true,
             "children": [
               {
                 "position": "TopLeft",
-                "color": "Green",
+                "color": "Blue",
                 "connectedWith": "TopRight"
               },
               {
                 "position": "TopRight",
-                "color": "Green",
+                "color": "Blue",
                 "connectedWith": "TopLeft"
               },
               {
                 "position": "BottomLeft",
-                "color": "Yellow",
-                "connectedWith": null
+                "color": "Blue",
+                "connectedWith": "BottomRight"
               },
               {
                 "position": "BottomRight",
-                "color": "Red",
-                "connectedWith": null
+                "color": "Blue",
+                "connectedWith": "BottomLeft"
               }
             ]
           },
           {
             "id": 6,
+            "isSquare": false,
             "children": [
               {
                 "position": "TopLeft",
-                "color": "Green",
-                "connectedWith": "TopRight"
+                "color": "Yellow",
+                "connectedWith": "BottomLeft"
               },
               {
                 "position": "TopRight",
-                "color": "Green",
-                "connectedWith": "TopLeft"
+                "color": "Red",
+                "connectedWith": "BottomRight"
               },
               {
                 "position": "BottomLeft",
                 "color": "Yellow",
-                "connectedWith": null
+                "connectedWith": "TopLeft"
               },
               {
                 "position": "BottomRight",
                 "color": "Red",
-                "connectedWith": null
+                "connectedWith": "TopRight"
               }
             ]
           }
@@ -158,8 +164,11 @@
       },
       "blocksGridPositions": [
         { "id": 1, "col": 0, "row": 5 },
-        { "id": 2, "col": 2, "row": 4 },
-        { "id": 3, "col": 3, "row": 2 }
+        { "id": 2, "col": 0, "row": 4 },
+        { "id": 3, "col": 1, "row": 5 },
+        { "id": 4, "col": 1, "row": 4 },
+        { "id": 5, "col": 2, "row": 5 },
+        { "id": 6, "col": 3, "row": 5 }
       ]
     }
   ]

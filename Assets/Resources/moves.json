@@ -5,22 +5,22 @@
       "children": [
         {
           "position": "TopLeft",
-          "color": "Red",
+          "color": "Green",
           "connectedWith": "TopRight"
         },
         {
           "position": "TopRight",
-          "color": "Red",
+          "color": "Green",
           "connectedWith": "TopLeft"
         },
         {
           "position": "BottomLeft",
-          "color": "Blue",
+          "color": "Red",
           "connectedWith": null
         },
         {
           "position": "BottomRight",
-          "color": "Green",
+          "color": "Blue",
           "connectedWith": null
         }
       ]
@@ -30,23 +30,23 @@
       "children": [
         {
           "position": "TopLeft",
-          "color": "Purple",
-          "connectedWith": null
+          "color": "Red",
+          "connectedWith": "TopRight"
         },
         {
           "position": "TopRight",
-          "color": "Blue",
-          "connectedWith": "BottomRight"
+          "color": "Red",
+          "connectedWith": "TopLeft"
         },
         {
           "position": "BottomLeft",
-          "color": "Red",
-          "connectedWith": null
+          "color": "Orange",
+          "connectedWith": "BottomRight"
         },
         {
           "position": "BottomRight",
-          "color": "Blue",
-          "connectedWith": "TopRight"
+          "color": "Orange",
+          "connectedWith": "BottomLeft"
         }
       ]
     },
@@ -56,21 +56,21 @@
         {
           "position": "TopLeft",
           "color": "Green",
-          "connectedWith": "TopRight"
+          "connectedWith": null
         },
         {
           "position": "TopRight",
-          "color": "Green",
-          "connectedWith": "TopLeft"
-        },
-        {
-          "position": "BottomLeft",
           "color": "Yellow",
           "connectedWith": null
         },
         {
-          "position": "BottomRight",
+          "position": "BottomLeft",
           "color": "Red",
+          "connectedWith": null
+        },
+        {
+          "position": "BottomRight",
+          "color": "Purple",
           "connectedWith": null
         }
       ]
@@ -80,73 +80,23 @@
       "children": [
         {
           "position": "TopLeft",
-          "color": "Green",
+          "color": "Red",
           "connectedWith": "TopRight"
         },
         {
           "position": "TopRight",
-          "color": "Green",
+          "color": "Red",
           "connectedWith": "TopLeft"
         },
         {
           "position": "BottomLeft",
-          "color": "Yellow",
-          "connectedWith": null
+          "color": "Red",
+          "connectedWith": "BottomRight"
         },
         {
           "position": "BottomRight",
           "color": "Red",
-          "connectedWith": null
-        }
-      ]
-    },
-    {
-      "id": 5,
-      "children": [
-        {
-          "position": "TopLeft",
-          "color": "Green",
-          "connectedWith": "TopRight"
-        },
-        {
-          "position": "TopRight",
-          "color": "Green",
-          "connectedWith": "TopLeft"
-        },
-        {
-          "position": "BottomLeft",
-          "color": "Yellow",
-          "connectedWith": null
-        },
-        {
-          "position": "BottomRight",
-          "color": "Red",
-          "connectedWith": null
-        }
-      ]
-    },
-    {
-      "id": 6,
-      "children": [
-        {
-          "position": "TopLeft",
-          "color": "Green",
-          "connectedWith": "TopRight"
-        },
-        {
-          "position": "TopRight",
-          "color": "Green",
-          "connectedWith": "TopLeft"
-        },
-        {
-          "position": "BottomLeft",
-          "color": "Yellow",
-          "connectedWith": null
-        },
-        {
-          "position": "BottomRight",
-          "color": "Red",
-          "connectedWith": null
+          "connectedWith": "BottomLeft"
         }
       ]
     }

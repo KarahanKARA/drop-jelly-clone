@@ -128,6 +128,8 @@ namespace _TheGame._Scripts.Managers
                 case "Yellow": return Enums.BlockColorType.Yellow;
                 case "Purple": return Enums.BlockColorType.Purple;
                 case "Pink": return Enums.BlockColorType.Pink;
+                case "Orange": return Enums.BlockColorType.Orange;
+                case "DarkBlue": return Enums.BlockColorType.DarkBlue;
                 default: return Enums.BlockColorType.None;
             }
         }

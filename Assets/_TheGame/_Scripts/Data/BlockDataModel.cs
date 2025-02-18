@@ -14,6 +14,7 @@ namespace _TheGame._Scripts.Data
         public class BlockData
         {
             public int id;
+            public bool isSquare;
             public ChildBlockData[] children;
         }
 

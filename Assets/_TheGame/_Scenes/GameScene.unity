@@ -96,8 +96,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
-  m_LightingSettings: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 701d093c99e3c443fb5d0fed58a5574f, type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: b4a5764d531bf4beb919f3464f2c57be, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -564,13 +564,13 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RenderingLayerMask: 1
-  m_Lightmapping: 4
+  m_Lightmapping: 1
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: NaN, z: 1.02e-43, w: 1.11e-43}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
@@ -1085,7 +1085,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 863188983}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c504a4a9238584c259a8c0a92153c465, type: 3}
+  m_Script: {fileID: 11500000, guid: 6cbe37106d5d42cf97ed2ebf6fe403a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &965314716
@@ -2466,8 +2466,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eeff501413db3490ebcb99bb0dd2cb78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentMoveData:
-    blocks: []
+  blockColorList:
+  - blockColorType: 1
+    blockColorMaterial: {fileID: 2100000, guid: c466029d4bed040b6ba6d50e4a14a2bc, type: 2}
+  - blockColorType: 2
+    blockColorMaterial: {fileID: 2100000, guid: cf2a93e5f97de4303837c6d5f351bb6b, type: 2}
+  - blockColorType: 3
+    blockColorMaterial: {fileID: 2100000, guid: 6233ef5a87aa44d6d809b6fde91bf879, type: 2}
+  - blockColorType: 4
+    blockColorMaterial: {fileID: 2100000, guid: dd1b3615d772d422db1a247630f3c1db, type: 2}
+  - blockColorType: 5
+    blockColorMaterial: {fileID: 2100000, guid: f48ec65ae8411473b92129f2a4fa6fa9, type: 2}
+  - blockColorType: 6
+    blockColorMaterial: {fileID: 2100000, guid: 696eb7a85ae3d4c20a3e111a9d115cd1, type: 2}
+  - blockColorType: 7
+    blockColorMaterial: {fileID: 2100000, guid: d62c5a4dfaeef4e548bad5ac02f54c50, type: 2}
+  - blockColorType: 8
+    blockColorMaterial: {fileID: 2100000, guid: 9bdaf6e4e3cfd4b929a3a14297dc8c42, type: 2}
   blockShapeScaleAndLocalPosList:
   - blockPositionType: 1
     localPos: {x: -0.5, y: 0.5}

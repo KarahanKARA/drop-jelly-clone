@@ -24,7 +24,6 @@ namespace _TheGame._Scripts.Board
     public class BoardGrid : MonoBehaviour
     {
         public bool showGizmos = true;
-        
         private GridPosition[,] _boardPositions;
         private BlockSystem[,] blockSystemGrid;
 
@@ -33,6 +32,47 @@ namespace _TheGame._Scripts.Board
             InitializeBoardPositions();
             blockSystemGrid = new BlockSystem[GameData.BoardSize, GameData.BoardSize];
         }
+
+        private void InitializeBoardPositions()
+        {
+            if(GameData.BoardSize <= 0)
+            {
+                Debug.LogError("GameData.BoardSize must be greater than 0!");
+                return;
+            }
+            _boardPositions = new GridPosition[GameData.BoardSize, GameData.BoardSize];
+            for (int row = 0; row < GameData.BoardSize; row++)
+            {
+                for (int col = 0; col < GameData.BoardSize; col++)
+                {
+                    float xPos = GameData.StartX + (col * GameData.Offset);
+                    float yPos = GameData.StartY - (row * GameData.Offset);
+                    _boardPositions[row, col] = new GridPosition(xPos, yPos);
+                }
+            }
+        }
+
+        public Vector2 GetPosition(int row, int col)
+        {
+            if (_boardPositions == null)
+            {
+                Debug.LogError("Board positions not initialized!");
+                return Vector2.zero;
+            }
+            if (!IsValidPosition(row, col))
+            {
+                Debug.LogError($"Invalid position request: row={row}, col={col}");
+                return Vector2.zero;
+            }
+            GridPosition pos = _boardPositions[row, col];
+            return new Vector2(pos.X, pos.Y);
+        }
+
+        private bool IsValidPosition(int row, int col)
+        {
+            return row >= 0 && row < GameData.BoardSize && col >= 0 && col < GameData.BoardSize;
+        }
+        
 
         public BlockSystem GetBlockSystemAt(int column, int row)
         {
@@ -57,21 +97,6 @@ namespace _TheGame._Scripts.Board
             if (IsValidPosition(column, row))
             {
                 blockSystemGrid[column, row] = null;
-            }
-        }
-        
-        private void InitializeBoardPositions()
-        {
-            _boardPositions = new GridPosition[GameData.BoardSize, GameData.BoardSize];
-
-            for (var row = 0; row < GameData.BoardSize; row++)
-            {
-                for (var col = 0; col < GameData.BoardSize; col++)
-                {
-                    var xPos = GameData.StartX + (col * GameData.Offset);
-                    var yPos = GameData.StartY - (row * GameData.Offset);
-                    _boardPositions[row, col] = new GridPosition(xPos, yPos);
-                }
             }
         }
 
@@ -163,24 +188,6 @@ namespace _TheGame._Scripts.Board
                     }
                 }
             }
-        }
-
-        private bool IsValidPosition(int column, int row)
-        {
-            return column is >= 0 and < GameData.BoardSize && 
-                   row is >= 0 and < GameData.BoardSize;
-        }
-
-        public Vector2 GetPosition(int row, int col)
-        {
-            if (!IsValidPosition(row, col))
-            {
-                Debug.LogError($"Invalid position request: row={row}, col={col}");
-                return Vector2.zero;
-            }
-
-            var pos = _boardPositions[row, col];
-            return new Vector2(pos.X, pos.Y);
         }
 
         private void OnDrawGizmos()

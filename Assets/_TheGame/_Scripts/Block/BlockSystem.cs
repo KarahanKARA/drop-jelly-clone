@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using _TheGame._Scripts.Board;
+using _TheGame._Scripts.Constants;
 using _TheGame._Scripts.Data;
 using _TheGame._Scripts.Helpers;
 using _TheGame._Scripts.Managers;
@@ -52,46 +53,30 @@ namespace _TheGame._Scripts.Block
         {
             var set = new HashSet<ChildBlockSystem>();
 
-            foreach (var kvp in _childBlockMap)
+            foreach (var b in _childBlockMap.Select(kvp => kvp.Value).Where(b => b != null))
             {
-                var b = kvp.Value;
-                if (b == null) continue;
-
                 if (b.isBigSquare)
                 {
                     var neighbors = GetExactNeighborBlocks(b);
                     var matchingNeighbors = new List<ChildBlockSystem>();
                     var hasMatch = false;
 
-                    for (int i = 0; i < neighbors.Count; i++)
+                    foreach (var n in neighbors.Where(n => n != null && n.blockColor == b.blockColor))
                     {
-                        var n = neighbors[i];
-                        if (n != null && n.blockColor == b.blockColor)
-                        {
-                            hasMatch = true;
-                            matchingNeighbors.Add(n);
-                        }
+                        hasMatch = true;
+                        matchingNeighbors.Add(n);
                     }
 
                     if (hasMatch)
                     {
-                        foreach (var child in _childBlockMap.Values)
+                        foreach (var child in _childBlockMap.Values.Where(child => child.blockColor == b.blockColor))
                         {
-                            if (child.blockColor == b.blockColor)
-                                set.Add(child);
+                            set.Add(child);
                         }
 
-                        for (var i = 0; i < matchingNeighbors.Count; i++)
+                        foreach (var child in from t in matchingNeighbors select t.transform.parent.GetComponent<BlockSystem>() into nb where nb != null && nb != this from child in nb._childBlockMap.Values where child.blockColor == b.blockColor select child)
                         {
-                            var nb = matchingNeighbors[i].transform.parent.GetComponent<BlockSystem>();
-                            if (nb != null && nb != this)
-                            {
-                                foreach (var child in nb._childBlockMap.Values)
-                                {
-                                    if (child.blockColor == b.blockColor)
-                                        set.Add(child);
-                                }
-                            }
+                            set.Add(child);
                         }
                     }
 
@@ -99,27 +84,23 @@ namespace _TheGame._Scripts.Block
                 }
 
                 var neigh = GetExactNeighborBlocks(b);
-                for (var i = 0; i < neigh.Count; i++)
+                foreach (var n in neigh.Where(n => n != null && n.blockColor == b.blockColor))
                 {
-                    var n = neigh[i];
-                    if (n != null && n.blockColor == b.blockColor)
+                    set.Add(b);
+                    set.Add(n);
+
+                    var nb = n.transform.parent.GetComponent<BlockSystem>();
+                    if (nb != null && nb != this)
                     {
-                        set.Add(b);
-                        set.Add(n);
-
-                        var nb = n.transform.parent.GetComponent<BlockSystem>();
-                        if (nb != null && nb != this)
+                        foreach (var child in nb._childBlockMap.Values)
                         {
-                            foreach (var child in nb._childBlockMap.Values)
-                            {
-                                if (child.blockColor == b.blockColor)
-                                    set.Add(child);
-                            }
+                            if (child.blockColor == b.blockColor)
+                                set.Add(child);
                         }
-
-                        FindConnectedBlocksToDestroy(b, set);
-                        FindConnectedBlocksToDestroy(n, set);
                     }
+
+                    FindConnectedBlocksToDestroy(b, set);
+                    FindConnectedBlocksToDestroy(n, set);
                 }
             }
 
@@ -139,8 +120,7 @@ namespace _TheGame._Scripts.Block
         private ChildBlockSystem GetConnectedBlock(ChildBlockSystem block)
         {
             if (block == null || !block.IsConnected) return null;
-            if (_childBlockMap.TryGetValue(block.ConnectedWith, out var connected)) return connected;
-            return null;
+            return _childBlockMap.GetValueOrDefault(block.ConnectedWith);
         }
 
         public void CheckExpand()
@@ -152,18 +132,12 @@ namespace _TheGame._Scripts.Block
                 Enums.ConnectionType.BottomLeft,
                 Enums.ConnectionType.BottomRight
             };
-            var empty = new List<Enums.ConnectionType>();
-            for (int i = 0; i < allPos.Length; i++)
-            {
-                var p = allPos[i];
-                if (!_childBlockMap.ContainsKey(p)) empty.Add(p);
-            }
+            var empty = allPos.Where(p => !_childBlockMap.ContainsKey(p)).ToList();
 
             if (empty.Count == 0) return;
 
-            for (int i = 0; i < empty.Count; i++)
+            foreach (var pos in empty)
             {
-                var pos = empty[i];
                 if (TryExpandVertically(pos)) continue;
                 TryExpandHorizontally(pos);
             }
@@ -251,13 +225,13 @@ namespace _TheGame._Scripts.Block
                 var finalPosClone = new Vector3(shape.localPos.x, shape.localPos.y, 0) +
                                     new Vector3(tgtData.positionOffset.x, tgtData.positionOffset.y, 0);
 
-                source.transform.DOLocalMove(finalPosSource, 0.3f).SetEase(Ease.OutBack);
-                obj.transform.DOLocalMove(finalPosClone, 0.3f).SetEase(Ease.OutBack);
+                source.transform.DOLocalMove(finalPosSource, NumericConstants.ExpandAnimDuration);
+                obj.transform.DOLocalMove(finalPosClone, NumericConstants.ExpandAnimDuration);
 
                 var scaleSource = new Vector3(srcData.scaleAdjustment.x, srcData.scaleAdjustment.y, 0.975f);
                 var scaleClone = new Vector3(tgtData.scaleAdjustment.x, tgtData.scaleAdjustment.y, 0.975f);
-                source.transform.DOScale(scaleSource, 0.3f).SetEase(Ease.OutBack);
-                obj.transform.DOScale(scaleClone, 0.3f).SetEase(Ease.OutBack);
+                source.transform.DOScale(scaleSource, NumericConstants.ExpandAnimDuration);
+                obj.transform.DOScale(scaleClone, NumericConstants.ExpandAnimDuration);
             }
             else
             {
@@ -347,8 +321,8 @@ namespace _TheGame._Scripts.Block
                 var finalPos = initPos + new Vector3(conn.positionOffset.x, conn.positionOffset.y, 0f);
                 var finalScale = new Vector3(conn.scaleAdjustment.x, conn.scaleAdjustment.y, 0.975f);
 
-                obj.transform.DOLocalMove(finalPos, 0.3f).SetEase(Ease.OutBack);
-                obj.transform.DOScale(finalScale, 0.3f).SetEase(Ease.OutBack);
+                obj.transform.DOLocalMove(finalPos, 0.4f);
+                obj.transform.DOScale(finalScale, 0.1f);
             }
             else
             {

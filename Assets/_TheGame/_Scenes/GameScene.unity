@@ -1701,7 +1701,6 @@ GameObject:
   - component: {fileID: 1342621787}
   - component: {fileID: 1342621788}
   - component: {fileID: 1342621789}
-  - component: {fileID: 1342621790}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -1759,18 +1758,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 13aebed1442ed4a82b504b0a88df8395, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1342621790
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1342621785}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cbf7c93179e6b467099a1743d4533d22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1372865113
@@ -2227,7 +2214,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rgbColorSystem: {fileID: 1342621787}
   blockCreatorSystem: {fileID: 1342621789}
-  matchSystem: {fileID: 1342621790}
 --- !u!1 &2010548805
 GameObject:
   m_ObjectHideFlags: 0

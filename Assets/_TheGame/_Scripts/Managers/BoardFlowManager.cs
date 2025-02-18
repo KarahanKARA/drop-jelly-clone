@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using _TheGame._Scripts.Block;
 using _TheGame._Scripts.Board;
+using _TheGame._Scripts.Constants;
 using _TheGame._Scripts.Data;
 using DG.Tweening;
 using UnityEngine;
@@ -68,10 +69,10 @@ namespace _TheGame._Scripts.Managers
                     {
                         grid.ApplyGravity(c);
                     }
-                    yield return new WaitForSeconds(0.3f);
+                    yield return new WaitForSeconds(NumericConstants.DelayBetweenAnimations);
                 }
 
-                yield return new WaitForSeconds(0.2f);
+                yield return new WaitForSeconds(NumericConstants.DelayBetweenAnimations);
             }
             onComplete?.Invoke();
         }

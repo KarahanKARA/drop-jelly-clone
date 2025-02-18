@@ -55,11 +55,6 @@ namespace _TheGame._Scripts.Managers
             }
 
             var levelIndex = SaveManager.Instance.GetLastLevelIndex();
-            if (levelIndex == -1)
-            {
-                Debug.Log("Endless mode not implemented yet.");
-                yield break;
-            }
 
             var levelsTextAsset = Resources.Load<TextAsset>("levels");
             if (levelsTextAsset == null)

@@ -13,7 +13,7 @@ namespace _TheGame._Scripts.Managers
 
         public int GetLastLevelIndex()
         {
-            return PlayerPrefs.GetInt(StringConstants.LastSceneIndex, -1);
+            return PlayerPrefs.GetInt(StringConstants.LastSceneIndex, 1);
         }
     }
 }

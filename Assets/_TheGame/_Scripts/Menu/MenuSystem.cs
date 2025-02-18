@@ -11,11 +11,5 @@ namespace _TheGame._Scripts.Menu
             SaveManager.Instance.SetLastLevelIndex(levelIndex);
             SceneManager.LoadScene(sceneBuildIndex: 1);
         }
-
-        public void EndlessLevelButtonOnClick()
-        {
-            SaveManager.Instance.SetLastLevelIndex(-1);
-            SceneManager.LoadScene(sceneBuildIndex: 1);
-        }
     }
 }

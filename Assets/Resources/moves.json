@@ -113,23 +113,23 @@
           "children": [
             {
               "position": "TopLeft",
-              "color": "Green",
-              "connectedWith": "TopRight"
+              "color": "Blue",
+              "connectedWith": null
             },
             {
               "position": "TopRight",
-              "color": "Green",
-              "connectedWith": "TopLeft"
+              "color": "Red",
+              "connectedWith": "BottomRight"
             },
             {
               "position": "BottomLeft",
-              "color": "Red",
+              "color": "Orange",
               "connectedWith": null
             },
             {
               "position": "BottomRight",
-              "color": "Blue",
-              "connectedWith": null
+              "color": "Red",
+              "connectedWith": "TopRight"
             }
           ]
         },
@@ -138,23 +138,23 @@
           "children": [
             {
               "position": "TopLeft",
-              "color": "Red",
-              "connectedWith": "TopRight"
+              "color": "Pink",
+              "connectedWith": null
             },
             {
               "position": "TopRight",
               "color": "Red",
-              "connectedWith": "TopLeft"
+              "connectedWith": null
             },
             {
               "position": "BottomLeft",
-              "color": "Orange",
-              "connectedWith": "BottomRight"
+              "color": "DarkBlue",
+              "connectedWith": null
             },
             {
               "position": "BottomRight",
-              "color": "Orange",
-              "connectedWith": "BottomLeft"
+              "color": "Yellow",
+              "connectedWith": null
             }
           ]
         },
@@ -163,23 +163,23 @@
           "children": [
             {
               "position": "TopLeft",
-              "color": "Green",
-              "connectedWith": null
+              "color": "Yellow",
+              "connectedWith": "TopRight"
             },
             {
               "position": "TopRight",
               "color": "Yellow",
-              "connectedWith": null
+              "connectedWith": "TopLeft"
             },
             {
               "position": "BottomLeft",
-              "color": "Red",
-              "connectedWith": null
+              "color": "Pink",
+              "connectedWith": "BottomRight"
             },
             {
               "position": "BottomRight",
-              "color": "Purple",
-              "connectedWith": null
+              "color": "Pink",
+              "connectedWith": "BottomLeft"
             }
           ]
         },
@@ -188,23 +188,48 @@
           "children": [
             {
               "position": "TopLeft",
-              "color": "Red",
-              "connectedWith": "TopRight"
+              "color": "Blue",
+              "connectedWith": null
             },
             {
               "position": "TopRight",
               "color": "Red",
-              "connectedWith": "TopLeft"
+              "connectedWith": null
             },
             {
               "position": "BottomLeft",
-              "color": "Red",
-              "connectedWith": "BottomRight"
+              "color": "Pink",
+              "connectedWith": null
             },
             {
               "position": "BottomRight",
-              "color": "Red",
+              "color": "Yellow",
+              "connectedWith": null
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "children": [
+            {
+              "position": "TopLeft",
+              "color": "Yellow",
               "connectedWith": "BottomLeft"
+            },
+            {
+              "position": "TopRight",
+              "color": "DarkBlue",
+              "connectedWith": "BottomRight"
+            },
+            {
+              "position": "BottomLeft",
+              "color": "Yellow",
+              "connectedWith": "TopLeft"
+            },
+            {
+              "position": "BottomRight",
+              "color": "DarkBlue",
+              "connectedWith": "TopRight"
             }
           ]
         }

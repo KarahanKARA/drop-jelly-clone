@@ -26,7 +26,7 @@ namespace _TheGame._Scripts.Systems
         {
             if (_blockCreatorSystem.CurrentActiveBlock == null) return;
             if (_blockCreatorSystem.CurrentActiveBlock.IsMoving) return; 
-        
+            
             _dragPlane = new Plane(Vector3.forward, 
                 new Vector3(0, 0, _blockCreatorSystem.CurrentActiveBlock.transform.position.z));
 

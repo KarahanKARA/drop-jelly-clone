@@ -19,6 +19,7 @@ namespace _TheGame._Scripts.Managers
 
         private IEnumerator FullFlowRoutine(Action onComplete)
         {
+            yield return new WaitForSeconds(0.2f);
             while (true)
             {
                 var allBlockSystems = FindObjectsOfType<BlockSystem>().ToList();

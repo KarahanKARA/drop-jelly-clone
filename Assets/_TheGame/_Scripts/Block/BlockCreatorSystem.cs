@@ -117,11 +117,7 @@ namespace _TheGame._Scripts.Block
                 _currentActiveBlock.OnBlockPlaced -= HandleBlockPlaced;
             }
 
-            var uiManager = FindObjectOfType<UiManager>();
-            if (uiManager != null)
-            {
-                uiManager.SetMovesText(_moveData.blocks.Length - _currentBlockIndex);
-            }
+            UiManager.Instance.SetMovesText(_moveData.blocks.Length - _currentBlockIndex);
 
             BoardFlowManager.Instance.StartFullFlowWithCallback(CreateNewBlock);
         }

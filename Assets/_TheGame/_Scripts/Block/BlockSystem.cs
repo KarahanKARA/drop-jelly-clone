@@ -11,6 +11,10 @@ using UnityEngine;
 
 namespace _TheGame._Scripts.Block
 {
+    /// <summary>
+    /// Manages a block system consisting of multiple child blocks.
+    /// Handles expansion, connection, destruction and transformation of blocks.
+    /// </summary>
     public class BlockSystem : MonoBehaviour
     {
         private const int BoardSize = GameData.BoardSize;
@@ -21,374 +25,482 @@ namespace _TheGame._Scripts.Block
         public Vector2Int positionData = new Vector2Int();
         private BoardGrid _boardGrid;
 
+        [Header("Animation Settings")]
+        [SerializeField] private float expandAnimationDuration = 0.4f;
+        [SerializeField] private float scaleAnimationDuration = 0.1f;
+
+        private BoardFlowManager _boardFlowManager;
+        #region Unity Lifecycle Methods
+
         private void OnEnable()
         {
             _boardGrid = ComponentReferences.Instance.boardGrid;
             positionData = new Vector2Int(-10, -10);
+            
+            if (BoardFlowManager.Instance != null)
+            {
+                _boardFlowManager = BoardFlowManager.Instance;
+                _boardFlowManager.RegisterBlockSystem(this);
+            }
         }
 
+        private void OnDestroy()
+        {
+            if (_boardGrid != null) 
+            {
+                _boardGrid.UnregisterBlockSystem(positionData.x, positionData.y);
+            }
+            
+            if (_boardFlowManager != null)
+            {
+                _boardFlowManager.UnregisterBlockSystem(this);
+            }
+            
+            DOTween.Kill(transform);
+        }
+
+        #endregion
+
+        #region Block Creation and Management
+
+        /// <summary>
+        /// Creates a child block with specified position, color and connection
+        /// </summary>
         public void CreateChildBlock(Enums.ConnectionType positionType, Enums.BlockColorType colorType,
             Enums.ConnectionType connectedWith)
         {
-            var obj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
-            var c = obj.GetComponent<ChildBlockSystem>();
+            var blockPositionType = GetBlockPositionType(positionType);
             var shapeData = DataManager.Instance.blockShapeScaleAndLocalPosList
-                .Find(x => x.blockPositionType == GetBlockPositionType(positionType));
+                .Find(x => x.blockPositionType == blockPositionType);
+                
             if (shapeData == null) return;
 
+            var obj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
+            var childBlock = obj.GetComponent<ChildBlockSystem>();
+            
             var initPos = new Vector3(shapeData.localPos.x, shapeData.localPos.y, 0f);
             var initScale = new Vector3(shapeData.localScale.x, shapeData.localScale.y, 1f);
-            c.Initialize(positionType, initPos, initScale);
-            c.SetBlockColor(colorType);
+            
+            childBlock.Initialize(positionType, initPos, initScale);
+            childBlock.SetBlockColor(colorType);
 
             if (connectedWith != Enums.ConnectionType.None)
             {
-                c.SetConnection(connectedWith);
+                childBlock.SetConnection(connectedWith);
             }
 
-            _childBlockMap[positionType] = c;
+            _childBlockMap[positionType] = childBlock;
         }
 
-        public HashSet<ChildBlockSystem> FindBlocksToDestroy()
+        /// <summary>
+        /// Finds all blocks that should be destroyed based on matching colors
+        /// </summary>
+        public List<ChildBlockSystem> FindBlocksToDestroy()
         {
-            var set = new HashSet<ChildBlockSystem>();
-
-            foreach (var b in _childBlockMap.Select(kvp => kvp.Value).Where(b => b != null))
+            var blocksToDestroy = new List<ChildBlockSystem>();
+            
+            foreach (var block in _childBlockMap.Values.Where(b => b != null))
             {
-                if (b.isBigSquare)
+                if (block.isBigSquare)
                 {
-                    var neighbors = GetExactNeighborBlocks(b);
-                    var matchingNeighbors = new List<ChildBlockSystem>();
-                    var hasMatch = false;
-
-                    foreach (var n in neighbors.Where(n => n != null && n.blockColor == b.blockColor))
-                    {
-                        hasMatch = true;
-                        matchingNeighbors.Add(n);
-                    }
-
-                    if (hasMatch)
-                    {
-                        foreach (var child in _childBlockMap.Values.Where(child => child.blockColor == b.blockColor))
-                        {
-                            set.Add(child);
-                        }
-
-                        foreach (var child in from t in matchingNeighbors select t.transform.parent.GetComponent<BlockSystem>() into nb where nb != null && nb != this from child in nb._childBlockMap.Values where child.blockColor == b.blockColor select child)
-                        {
-                            set.Add(child);
-                        }
-                    }
-
+                    ProcessBigSquareBlock(block, blocksToDestroy);
                     continue;
                 }
-
-                var neigh = GetExactNeighborBlocks(b);
-                foreach (var n in neigh.Where(n => n != null && n.blockColor == b.blockColor))
+                
+                ProcessRegularBlock(block, blocksToDestroy);
+            }
+            
+            return blocksToDestroy;
+        }
+        
+        private void ProcessBigSquareBlock(ChildBlockSystem block, List<ChildBlockSystem> blocksToDestroy)
+        {
+            var neighbors = GetExactNeighborBlocks(block);
+            var matchingNeighbors = neighbors.Where(n => n != null && n.blockColor == block.blockColor).ToList();
+            
+            if (matchingNeighbors.Count > 0)
+            {
+                foreach (var childBlock in _childBlockMap.Values.Where(child => child.blockColor == block.blockColor))
                 {
-                    set.Add(b);
-                    set.Add(n);
-
-                    var nb = n.transform.parent.GetComponent<BlockSystem>();
-                    if (nb != null && nb != this)
+                    blocksToDestroy.Add(childBlock);
+                }
+                
+                foreach (var neighborBlock in matchingNeighbors)
+                {
+                    var neighborSystem = neighborBlock.transform.parent.GetComponent<BlockSystem>();
+                    if (neighborSystem != null && neighborSystem != this)
                     {
-                        foreach (var child in nb._childBlockMap.Values)
+                        foreach (var childBlock in neighborSystem._childBlockMap.Values)
                         {
-                            if (child.blockColor == b.blockColor)
-                                set.Add(child);
+                            if (childBlock.blockColor == block.blockColor)
+                            {
+                                blocksToDestroy.Add(childBlock);
+                            }
                         }
                     }
-
-                    FindConnectedBlocksToDestroy(b, set);
-                    FindConnectedBlocksToDestroy(n, set);
                 }
             }
-
-            return set;
         }
-
-        private void FindConnectedBlocksToDestroy(ChildBlockSystem block, HashSet<ChildBlockSystem> set)
+        
+        private void ProcessRegularBlock(ChildBlockSystem block, List<ChildBlockSystem> blocksToDestroy)
         {
-            if (block == null || !block.IsConnected) return;
-            var c = GetConnectedBlock(block);
-            if (c != null && c.blockColor == block.blockColor)
+            var neighbors = GetExactNeighborBlocks(block);
+            
+            foreach (var neighbor in neighbors)
             {
-                set.Add(c);
+                if (neighbor == null || neighbor.blockColor != block.blockColor) continue;
+                
+                blocksToDestroy.Add(block);
+                blocksToDestroy.Add(neighbor);
+                
+                var neighborSystem = neighbor.transform.parent.GetComponent<BlockSystem>();
+                if (neighborSystem != null && neighborSystem != this)
+                {
+                    foreach (var childBlock in neighborSystem._childBlockMap.Values)
+                    {
+                        if (childBlock.blockColor == block.blockColor)
+                        {
+                            blocksToDestroy.Add(childBlock);
+                        }
+                    }
+                }
+                
+                FindConnectedBlocksToDestroy(block, blocksToDestroy);
+                FindConnectedBlocksToDestroy(neighbor, blocksToDestroy);
             }
         }
-
+        
+        private void FindConnectedBlocksToDestroy(ChildBlockSystem block, List<ChildBlockSystem> blocksToDestroy)
+        {
+            if (block == null || !block.IsConnected) return;
+            
+            var connectedBlock = GetConnectedBlock(block);
+            if (connectedBlock != null && connectedBlock.blockColor == block.blockColor)
+            {
+                blocksToDestroy.Add(connectedBlock);
+            }
+        }
+        
         private ChildBlockSystem GetConnectedBlock(ChildBlockSystem block)
         {
             if (block == null || !block.IsConnected) return null;
-            return _childBlockMap.GetValueOrDefault(block.ConnectedWith);
+            
+            return _childBlockMap.TryGetValue(block.ConnectedWith, out var connectedBlock) ? connectedBlock : null;
         }
 
+        #endregion
+
+        #region Block Expansion and Transformation
+
+        /// <summary>
+        /// Checks if the block system should expand to fill empty positions
+        /// </summary>
         public void CheckExpand()
         {
-            var allPos = new[]
+            var allPositions = new[]
             {
                 Enums.ConnectionType.TopLeft,
                 Enums.ConnectionType.TopRight,
                 Enums.ConnectionType.BottomLeft,
                 Enums.ConnectionType.BottomRight
             };
-            var empty = allPos.Where(p => !_childBlockMap.ContainsKey(p)).ToList();
-
-            if (empty.Count == 0) return;
-
-            foreach (var pos in empty)
+            
+            var emptyPositions = allPositions.Where(p => !_childBlockMap.ContainsKey(p)).ToList();
+            
+            if (emptyPositions.Count == 0) return;
+            
+            foreach (var emptyPosition in emptyPositions)
             {
-                if (TryExpandVertically(pos)) continue;
-                TryExpandHorizontally(pos);
+                if (TryExpandVertically(emptyPosition)) continue;
+                TryExpandHorizontally(emptyPosition);
             }
-
-            if (_boardGrid != null && _childBlockMap.Count > 0)
+            
+            UpdateBoardGridRegistration();
+        }
+        
+        private void UpdateBoardGridRegistration()
+        {
+            if (_boardGrid == null || _childBlockMap.Count == 0) return;
+            
+            var col = positionData.x;
+            var row = positionData.y;
+            
+            if (col >= 0 && row >= 0 && col < BoardSize && row < BoardSize)
             {
-                var col = positionData.x;
-                var row = positionData.y;
-                if (col >= 0 && row >= 0 && col < BoardSize && row < BoardSize)
-                {
-                    _boardGrid.RegisterBlockSystem(col, row, this);
-                    _boardGrid.SetPositionOccupied(row, col);
-                }
+                _boardGrid.RegisterBlockSystem(col, row, this);
+                _boardGrid.SetPositionOccupied(row, col);
             }
         }
-
+        
         private bool TryExpandVertically(Enums.ConnectionType emptyPos)
         {
-            var list = _childBlockMap.Values.ToList();
-            var source = list.FirstOrDefault(b =>
+            var blocks = _childBlockMap.Values.ToList();
+            
+            var sourceBlock = blocks.FirstOrDefault(b =>
             {
                 if (b.IsConnected) return false;
-                if (b.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.BottomLeft)
-                    return true;
-                if (b.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.BottomRight)
-                    return true;
-                if (b.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.TopLeft)
-                    return true;
-                if (b.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.TopRight)
-                    return true;
-                return false;
+                
+                return (b.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.BottomLeft) ||
+                       (b.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.BottomRight) ||
+                       (b.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.TopLeft) ||
+                       (b.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.TopRight);
             });
-            if (source != null)
+            
+            if (sourceBlock != null)
             {
-                CloneAndMove(source, emptyPos);
+                CloneAndMove(sourceBlock, emptyPos);
                 return true;
             }
-
+            
             return false;
         }
-
+        
         private void TryExpandHorizontally(Enums.ConnectionType emptyPos)
         {
-            var list = _childBlockMap.Values.ToList();
-            var source = list.FirstOrDefault(b =>
+            var blocks = _childBlockMap.Values.ToList();
+            
+            var sourceBlock = blocks.FirstOrDefault(b =>
             {
                 if (b.IsConnected) return false;
-                if (b.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.TopRight)
-                    return true;
-                if (b.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.TopLeft)
-                    return true;
-                if (b.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.BottomRight)
-                    return true;
-                if (b.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.BottomLeft)
-                    return true;
-                return false;
+                
+                return (b.position == Enums.ConnectionType.TopLeft && emptyPos == Enums.ConnectionType.TopRight) ||
+                       (b.position == Enums.ConnectionType.TopRight && emptyPos == Enums.ConnectionType.TopLeft) ||
+                       (b.position == Enums.ConnectionType.BottomLeft && emptyPos == Enums.ConnectionType.BottomRight) ||
+                       (b.position == Enums.ConnectionType.BottomRight && emptyPos == Enums.ConnectionType.BottomLeft);
             });
-            if (source != null)
+            
+            if (sourceBlock != null)
             {
-                CloneAndMove(source, emptyPos);
+                CloneAndMove(sourceBlock, emptyPos);
             }
         }
-
+        
         private void CloneAndMove(ChildBlockSystem source, Enums.ConnectionType targetPos)
         {
-            var obj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
-            var c = obj.GetComponent<ChildBlockSystem>();
-            c.Initialize(targetPos, source.transform.localPosition, source.transform.localScale);
-            c.SetBlockColor(source.blockColor);
-
-            var shape = DataManager.Instance.blockShapeScaleAndLocalPosList
+            var newBlock = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
+            var clonedBlock = newBlock.GetComponent<ChildBlockSystem>();
+            
+            clonedBlock.Initialize(targetPos, source.transform.localPosition, source.transform.localScale);
+            clonedBlock.SetBlockColor(source.blockColor);
+            
+            var targetShape = DataManager.Instance.blockShapeScaleAndLocalPosList
                 .Find(x => x.blockPositionType == GetBlockPositionType(targetPos));
-            if (shape != null)
+                
+            if (targetShape == null)
             {
-                var srcData = DataManager.Instance.GetConnectionData(source.position);
-                var tgtData = DataManager.Instance.GetConnectionData(targetPos);
-                if (srcData == null || tgtData == null)
-                {
-                    Debug.LogError("Connection data is null!");
-                    return;
-                }
-
-                var finalPosSource = source.transform.localPosition +
-                                     new Vector3(srcData.positionOffset.x, srcData.positionOffset.y, 0);
-                var finalPosClone = new Vector3(shape.localPos.x, shape.localPos.y, 0) +
-                                    new Vector3(tgtData.positionOffset.x, tgtData.positionOffset.y, 0);
-
-                source.transform.DOLocalMove(finalPosSource, NumericConstants.ExpandAnimDuration);
-                obj.transform.DOLocalMove(finalPosClone, NumericConstants.ExpandAnimDuration);
-
-                var scaleSource = new Vector3(srcData.scaleAdjustment.x, srcData.scaleAdjustment.y, 0.975f);
-                var scaleClone = new Vector3(tgtData.scaleAdjustment.x, tgtData.scaleAdjustment.y, 0.975f);
-                source.transform.DOScale(scaleSource, NumericConstants.ExpandAnimDuration);
-                obj.transform.DOScale(scaleClone, NumericConstants.ExpandAnimDuration);
-            }
-            else
-            {
-                Debug.LogError("Could not find target position data for " + targetPos);
+                Debug.LogError($"Could not find target position data for {targetPos}");
+                Destroy(newBlock);
                 return;
             }
-
+            
+            var sourceConnectionData = DataManager.Instance.GetConnectionData(source.position);
+            var targetConnectionData = DataManager.Instance.GetConnectionData(targetPos);
+            
+            if (sourceConnectionData == null || targetConnectionData == null)
+            {
+                Debug.LogError("Connection data is null!");
+                Destroy(newBlock);
+                return;
+            }
+            
+            var finalSourcePosition = source.transform.localPosition +
+                                 new Vector3(sourceConnectionData.positionOffset.x, sourceConnectionData.positionOffset.y, 0);
+                                 
+            var finalClonedPosition = new Vector3(targetShape.localPos.x, targetShape.localPos.y, 0) +
+                                new Vector3(targetConnectionData.positionOffset.x, targetConnectionData.positionOffset.y, 0);
+            
+            var finalSourceScale = new Vector3(sourceConnectionData.scaleAdjustment.x, sourceConnectionData.scaleAdjustment.y, 0.975f);
+            var finalClonedScale = new Vector3(targetConnectionData.scaleAdjustment.x, targetConnectionData.scaleAdjustment.y, 0.975f);
+            
+            source.transform.DOLocalMove(finalSourcePosition, NumericConstants.ExpandAnimDuration);
+            source.transform.DOScale(finalSourceScale, NumericConstants.ExpandAnimDuration);
+            
+            newBlock.transform.DOLocalMove(finalClonedPosition, NumericConstants.ExpandAnimDuration);
+            newBlock.transform.DOScale(finalClonedScale, NumericConstants.ExpandAnimDuration);
+            
             source.SetConnection(targetPos);
-            c.SetConnection(source.position);
-            _childBlockMap[targetPos] = c;
+            clonedBlock.SetConnection(source.position);
+            
+            _childBlockMap[targetPos] = clonedBlock;
         }
 
+        /// <summary>
+        /// Checks if the block system is now empty and should be destroyed
+        /// </summary>
         public void CheckIfEmpty()
         {
             if (_childBlockMap.Count == 0)
             {
                 var col = positionData.x;
                 var row = positionData.y;
+                
                 if (_boardGrid != null)
                 {
                     _boardGrid.UnregisterBlockSystem(col, row);
                     _boardGrid.SetPositionEmpty(row, col);
                 }
-
+                
                 Destroy(gameObject);
-                if (_boardGrid != null) _boardGrid.ApplyGravity(col);
+                
+                if (_boardGrid != null) 
+                {
+                    _boardGrid.ApplyGravity(col);
+                }
             }
         }
 
+        /// <summary>
+        /// Try to convert the block system into a big square if all blocks are the same color
+        /// </summary>
         public void TryMakeBigSquareIfSingleColor()
         {
             if (_childBlockMap.Count < 2) return;
-            var list = _childBlockMap.Values.ToList();
-            var c = list[0].blockColor;
-            for (int i = 1; i < list.Count; i++)
+            
+            var blocks = _childBlockMap.Values.ToList();
+            var firstBlockColor = blocks[0].blockColor;
+            
+            if (blocks.Any(block => block.blockColor != firstBlockColor))
             {
-                if (list[i].blockColor != c) return;
+                return;
             }
-
-            var allPos = new[]
+            
+            var allPositions = new[]
             {
                 Enums.ConnectionType.TopLeft,
                 Enums.ConnectionType.TopRight,
                 Enums.ConnectionType.BottomLeft,
                 Enums.ConnectionType.BottomRight
             };
-            var missing = new List<Enums.ConnectionType>();
-            for (int i = 0; i < allPos.Length; i++)
+            
+            var missingPositions = allPositions
+                .Where(position => !_childBlockMap.ContainsKey(position))
+                .ToList();
+                
+            if (missingPositions.Count == 0) return;
+            
+            foreach (var missingPosition in missingPositions)
             {
-                var p = allPos[i];
-                if (!_childBlockMap.ContainsKey(p)) missing.Add(p);
+                CloneForBigSquare(missingPosition, firstBlockColor);
             }
-
-            if (missing.Count == 0) return;
-            for (int i = 0; i < missing.Count; i++)
+            
+            foreach (var block in _childBlockMap.Values)
             {
-                CloneForBigSquare(missing[i], c);
-            }
-
-            foreach (var child in _childBlockMap.Values)
-            {
-                child.isBigSquare = true;
+                block.isBigSquare = true;
             }
         }
-
+        
         private void CloneForBigSquare(Enums.ConnectionType targetPos, Enums.BlockColorType color)
         {
             var obj = Instantiate(PrefabReferences.Instance.block1X1Prefab, transform);
-            var c = obj.GetComponent<ChildBlockSystem>();
-
+            var newBlock = obj.GetComponent<ChildBlockSystem>();
+            
             var shape = DataManager.Instance.blockShapeScaleAndLocalPosList
                 .Find(x => x.blockPositionType == GetBlockPositionType(targetPos));
-            if (shape != null)
+                
+            if (shape == null)
             {
-                var conn = DataManager.Instance.GetConnectionData(targetPos);
-                if (conn == null)
-                {
-                    Debug.LogError("Connection data is null for big square pos: " + targetPos);
-                    return;
-                }
-
-                var initPos = new Vector3(shape.localPos.x, shape.localPos.y, 0f);
-                var initScale = new Vector3(shape.localScale.x, shape.localScale.y, 1f);
-                c.Initialize(targetPos, initPos, initScale);
-                c.SetBlockColor(color);
-
-                var finalPos = initPos + new Vector3(conn.positionOffset.x, conn.positionOffset.y, 0f);
-                var finalScale = new Vector3(conn.scaleAdjustment.x, conn.scaleAdjustment.y, 0.975f);
-
-                obj.transform.DOLocalMove(finalPos, 0.4f);
-                obj.transform.DOScale(finalScale, 0.1f);
-            }
-            else
-            {
-                Debug.LogError("Could not find target position data for " + targetPos);
+                Debug.LogError($"Could not find target position data for {targetPos}");
+                Destroy(obj);
                 return;
             }
-
-            c.isBigSquare = true;
-            _childBlockMap[targetPos] = c;
+            
+            var connectionData = DataManager.Instance.GetConnectionData(targetPos);
+            if (connectionData == null)
+            {
+                Debug.LogError($"Connection data is null for big square pos: {targetPos}");
+                Destroy(obj);
+                return;
+            }
+            
+            var initialPosition = new Vector3(shape.localPos.x, shape.localPos.y, 0f);
+            var initialScale = new Vector3(shape.localScale.x, shape.localScale.y, 1f);
+            
+            newBlock.Initialize(targetPos, initialPosition, initialScale);
+            newBlock.SetBlockColor(color);
+            
+            var finalPosition = initialPosition + new Vector3(connectionData.positionOffset.x, connectionData.positionOffset.y, 0f);
+            var finalScale = new Vector3(connectionData.scaleAdjustment.x, connectionData.scaleAdjustment.y, 0.975f);
+            
+            obj.transform.DOLocalMove(finalPosition, expandAnimationDuration);
+            obj.transform.DOScale(finalScale, scaleAnimationDuration);
+            
+            newBlock.isBigSquare = true;
+            _childBlockMap[targetPos] = newBlock;
         }
 
-        private List<ChildBlockSystem> GetExactNeighborBlocks(ChildBlockSystem b)
+        #endregion
+
+        #region Neighbor and Block Position Utilities
+
+        /// <summary>
+        /// Gets the neighboring blocks that match the exact position of the provided block
+        /// </summary>
+        private List<ChildBlockSystem> GetExactNeighborBlocks(ChildBlockSystem block)
         {
-            var list = new List<ChildBlockSystem>();
+            var neighbors = new List<ChildBlockSystem>();
+            
             var x = positionData.x;
             var y = positionData.y;
-
-            if (b.position == Enums.ConnectionType.TopLeft)
+            
+            switch (block.position)
             {
-                if (x - 1 >= 0) list.Add(GetChildBlockAt(x - 1, y, Enums.ConnectionType.TopRight));
-                if (y - 1 >= 0) list.Add(GetChildBlockAt(x, y - 1, Enums.ConnectionType.BottomLeft));
+                case Enums.ConnectionType.TopLeft:
+                    if (x - 1 >= 0) neighbors.Add(GetChildBlockAt(x - 1, y, Enums.ConnectionType.TopRight));
+                    if (y - 1 >= 0) neighbors.Add(GetChildBlockAt(x, y - 1, Enums.ConnectionType.BottomLeft));
+                    break;
+                    
+                case Enums.ConnectionType.TopRight:
+                    if (x + 1 < BoardSize) neighbors.Add(GetChildBlockAt(x + 1, y, Enums.ConnectionType.TopLeft));
+                    if (y - 1 >= 0) neighbors.Add(GetChildBlockAt(x, y - 1, Enums.ConnectionType.BottomRight));
+                    break;
+                    
+                case Enums.ConnectionType.BottomLeft:
+                    if (x - 1 >= 0) neighbors.Add(GetChildBlockAt(x - 1, y, Enums.ConnectionType.BottomRight));
+                    if (y + 1 < BoardSize) neighbors.Add(GetChildBlockAt(x, y + 1, Enums.ConnectionType.TopLeft));
+                    break;
+                    
+                case Enums.ConnectionType.BottomRight:
+                    if (x + 1 < BoardSize) neighbors.Add(GetChildBlockAt(x + 1, y, Enums.ConnectionType.BottomLeft));
+                    if (y + 1 < BoardSize) neighbors.Add(GetChildBlockAt(x, y + 1, Enums.ConnectionType.TopRight));
+                    break;
             }
-
-            if (b.position == Enums.ConnectionType.TopRight)
-            {
-                if (x + 1 < BoardSize) list.Add(GetChildBlockAt(x + 1, y, Enums.ConnectionType.TopLeft));
-                if (y - 1 >= 0) list.Add(GetChildBlockAt(x, y - 1, Enums.ConnectionType.BottomRight));
-            }
-
-            if (b.position == Enums.ConnectionType.BottomLeft)
-            {
-                if (x - 1 >= 0) list.Add(GetChildBlockAt(x - 1, y, Enums.ConnectionType.BottomRight));
-                if (y + 1 < BoardSize) list.Add(GetChildBlockAt(x, y + 1, Enums.ConnectionType.TopLeft));
-            }
-
-            if (b.position == Enums.ConnectionType.BottomRight)
-            {
-                if (x + 1 < BoardSize) list.Add(GetChildBlockAt(x + 1, y, Enums.ConnectionType.BottomLeft));
-                if (y + 1 < BoardSize) list.Add(GetChildBlockAt(x, y + 1, Enums.ConnectionType.TopRight));
-            }
-
-            return list;
+            
+            return neighbors.Where(n => n != null).ToList();
         }
-
-        private ChildBlockSystem GetChildBlockAt(int cx, int cy, Enums.ConnectionType cp)
+        
+        /// <summary>
+        /// Gets a child block at the specified position from the board grid
+        /// </summary>
+        private ChildBlockSystem GetChildBlockAt(int col, int row, Enums.ConnectionType position)
         {
             if (_boardGrid == null) return null;
-            var nb = _boardGrid.GetBlockSystemAt(cx, cy);
-            if (nb == null) return null;
-            if (nb._childBlockMap.TryGetValue(cp, out var child)) return child;
-            return null;
+            
+            var blockSystem = _boardGrid.GetBlockSystemAt(col, row);
+            if (blockSystem == null) return null;
+            
+            return blockSystem._childBlockMap.GetValueOrDefault(position);
+        }
+        
+        /// <summary>
+        /// Converts a connection type to a block position type
+        /// </summary>
+        private Enums.BlockPositionType GetBlockPositionType(Enums.ConnectionType connectionType)
+        {
+            switch (connectionType)
+            {
+                case Enums.ConnectionType.TopLeft:
+                    return Enums.BlockPositionType.TopLeft;
+                case Enums.ConnectionType.TopRight:
+                    return Enums.BlockPositionType.TopRight;
+                case Enums.ConnectionType.BottomLeft:
+                    return Enums.BlockPositionType.BottomLeft;
+                case Enums.ConnectionType.BottomRight:
+                    return Enums.BlockPositionType.BottomRight;
+                default:
+                    return Enums.BlockPositionType.None;
+            }
         }
 
-        private Enums.BlockPositionType GetBlockPositionType(Enums.ConnectionType ct)
-        {
-            if (ct == Enums.ConnectionType.TopLeft) return Enums.BlockPositionType.TopLeft;
-            if (ct == Enums.ConnectionType.TopRight) return Enums.BlockPositionType.TopRight;
-            if (ct == Enums.ConnectionType.BottomLeft) return Enums.BlockPositionType.BottomLeft;
-            if (ct == Enums.ConnectionType.BottomRight) return Enums.BlockPositionType.BottomRight;
-            return Enums.BlockPositionType.None;
-        }
-
-        private void OnDestroy()
-        {
-            if (_boardGrid != null) _boardGrid.UnregisterBlockSystem(positionData.x, positionData.y);
-            DOTween.Kill(transform);
-        }
+        #endregion
     }
 }

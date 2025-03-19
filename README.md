@@ -2,7 +2,6 @@
 
 A Unity-based puzzle game inspired by Drop Jelly, featuring colorful block matching mechanics and physics-based gameplay.
 
-![Screenshot 1](screenshots/screenshot1.png)
 ![Screenshot 2](screenshots/screenshot2.png)
 
 ## Overview
@@ -46,7 +45,7 @@ Key mechanics:
 
 1. Clone this repository
 2. Open the project with Unity 2022.3.55 or later
-3. Open the `MainScene` scene in the `Assets/_Scenes` folder
+3. Open the `MenuScene` scene in the `Assets/_Scenes` folder
 4. Press Play to run the game in the editor
 
 ## Building the Game
@@ -73,11 +72,6 @@ While this is a prototype with 3 playable levels, the architecture supports easy
 
 ## Credits
 
-- Developed by [Your Name/Team]
 - Inspired by Drop Jelly
 - Created with Unity 2022.3.55
 - DoTween animation library by Daniele Giardini
-
-## License
-
-[Include your license information here]

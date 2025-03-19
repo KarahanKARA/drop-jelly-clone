@@ -21,11 +21,7 @@ namespace _TheGame._Scripts.Block
     
             if (_moveData != null && _moveData.blocks != null)
             {
-                var uiManager = FindObjectOfType<UiManager>();
-                if (uiManager != null)
-                {
-                    UiManager.Instance.SetMovesText(_moveData.blocks.Length);
-                }
+                UiManager.Instance.SetMovesText(_moveData.blocks.Length);
             }
 
             CreateNewBlock();
